@@ -1,0 +1,16 @@
+# xtensor-sparse cmake module
+# This module sets the following variables in your project::
+#
+#   xtensor-sparse_FOUND - true if xtensor found on the system
+#   xtensor-sparse_INCLUDE_DIRS - the directory containing xtensor headers
+#   xtensor-sparse_LIBRARY - empty
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET @PROJECT_NAME@)
+    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+    get_target_property(@PROJECT_NAME@_INCLUDE_DIRS @PROJECT_NAME@ INTERFACE_INCLUDE_DIRECTORIES)
+endif()
+
