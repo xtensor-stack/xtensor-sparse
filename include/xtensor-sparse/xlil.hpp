@@ -124,7 +124,6 @@ namespace xt
 
         std::array<int, sizeof...(Args) + 1> {(res1.push_back(args), 0)..., 0};
 
-        res1.pop_back();
         res2 = res1.back();
         res1.pop_back();
         return {res1, res2};
