@@ -28,7 +28,12 @@ make xtest
 
 ## Dependencies
 
-No dependencies yet.
+`xtensor-sparse` depends on the [xtensor](https://github.com/xtensor-stack/xtensor) library:
+
+| `xtensor-sparse` |    `xtensor`    |
+|------------------|-----------------|
+|    master        | >=0.21.4, <0.22 |
+
 
 ## License
 
