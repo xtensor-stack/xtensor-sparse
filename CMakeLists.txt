@@ -54,6 +54,8 @@ target_compile_features(xtensor-sparse INTERFACE cxx_std_14)
 
 target_link_libraries(xtensor-sparse INTERFACE xtensor)
 
+OPTION(XTENSOR_ENABLE_ASSERT "xtensor bound check" OFF)
+OPTION(XTENSOR_CHECK_DIMENSION "xtensor dimension check" OFF)
 OPTION(BUILD_TESTS "xtensor-sparse test suite" OFF)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 OPTION(CPP17 "enables C++17" OFF)
@@ -62,6 +64,14 @@ OPTION(XTENSOR_SPARSE_DISABLE_EXCEPTIONS "Disable C++ exceptions" OFF)
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     set(BUILD_TESTS ON)
+endif()
+
+if(XTENSOR_ENABLE_ASSERT OR XTENSOR_CHECK_DIMENSION)
+    add_definitions(-DXTENSOR_ENABLE_ASSERT)
+endif()
+
+if(XTENSOR_CHECK_DIMENSION)
+    add_definitions(-DXTENSOR_ENABLE_CHECK_DIMENSION)
 endif()
 
 if(BUILD_TESTS)

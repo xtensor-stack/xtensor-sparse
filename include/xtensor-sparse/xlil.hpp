@@ -6,6 +6,9 @@
 #include <utility>
 #include <vector>
 
+#include <xtensor/xstorage.hpp>
+#include <xtensor/xexception.hpp>
+
 namespace xt
 {
     template<class T>
@@ -20,6 +23,15 @@ namespace xt
         using const_pointer = const T*;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
+
+        using shape_type = svector<size_type>;
+
+        using inner_shape_type = svector<size_type>;
+
+        xlil_container(const shape_type& shape);
+
+        const shape_type& shape() const;
+        size_type dimension() const;
 
         template<class... Args>
         const_reference operator()(Args... args) const;
@@ -43,6 +55,7 @@ namespace xt
         template<class... Args>
         std::pair<list_index_type, index_type> build_keys(Args... args) const;
 
+        shape_type m_shape;
         container_type m_data;
     };
 
@@ -50,9 +63,28 @@ namespace xt
     const typename xlil_container<T>::value_type xlil_container<T>::ZERO = 0;
 
     template<class T>
+    xlil_container<T>::xlil_container(const shape_type& shape)
+     : m_shape{shape}
+    {}
+
+    template<class T>
+    auto xlil_container<T>::shape() const -> const shape_type&
+    {
+        return m_shape;
+    }
+
+    template<class T>
+    auto xlil_container<T>::dimension() const -> size_type
+    {
+        return m_shape.size();
+    }
+
+    template<class T>
     template<class... Args>
     auto xlil_container<T>::operator()(Args... args) const -> const_reference
     {
+        XTENSOR_TRY(check_index(shape(), args...));
+        XTENSOR_CHECK_DIMENSION(shape(), args...);
         return access_impl(args...);
     }
 
@@ -60,6 +92,8 @@ namespace xt
     template<class... Args>
     auto xlil_container<T>::operator()(Args... args) -> reference
     {
+        XTENSOR_TRY(check_index(shape(), args...));
+        XTENSOR_CHECK_DIMENSION(shape(), args...);
         return access_impl(args...);
     }
 
