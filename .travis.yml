@@ -5,7 +5,6 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -14,7 +13,6 @@ matrix:
             - g++-4.9
       env: COMPILER=gcc GCC=4.9 CHECK_CYCLIC_INCLUDES=1
     - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -23,7 +21,6 @@ matrix:
             - g++-5
       env: COMPILER=gcc GCC=5
     - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -32,16 +29,6 @@ matrix:
             - g++-6
       env: COMPILER=gcc GCC=6 DISABLE_EXCEPTION=1
     - os: linux
-      if: branch = master
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env: COMPILER=gcc GCC=6 COLUMN_MAJOR_LAYOUT=1
-    - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -49,8 +36,7 @@ matrix:
           packages:
             - g++-7
       env: COMPILER=gcc GCC=7
-   - os: linux
-      if: branch = master
+    - os: linux
       addons:
         apt:
           sources:
@@ -59,7 +45,6 @@ matrix:
             - g++-8
       env: COMPILER=gcc GCC=8 ENABLE_CPP17=1
     - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -68,7 +53,6 @@ matrix:
             - g++-9
       env: COMPILER=gcc GCC=9
     - os: linux
-      if: branch = master
       addons:
         apt:
           sources:
@@ -77,7 +61,6 @@ matrix:
             - g++-9
       env: COMPILER=gcc GCC=9 ENABLE_CPP20=1
     - os: osx
-      if: branch = master
       osx_image: xcode8
       compiler: clang
   allow_failures:
@@ -124,14 +107,9 @@ install:
     # Testing
     - mkdir build
     - cd build
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        cat /proc/cpuinfo;
-        ldd --version;
-      fi
-    - if [[ "$BOUND_CHECKS" == 1 ]]; then
+    - |
+      if [[ "$BOUND_CHECKS" == 1 ]]; then
         cmake -DXTENSOR_ENABLE_ASSERT=ON -DDOWNLOAD_GTEST=ON ..;
-      elif [[ "$COLUMN_MAJOR_LAYOUT" == 1 ]]; then
-        cmake -DDOWNLOAD_GTEST=ON -DDEFAULT_COLUMN_MAJOR=ON ..;
       elif [[ "$ENABLE_CPP17" == 1 ]]; then
         cmake -DDOWNLOAD_GTEST=ON -DCPP17=ON ..;
       elif [[ "$ENABLE_CPP20" == 1 ]]; then
@@ -139,9 +117,8 @@ install:
       elif [[ "$DISABLE_EXCEPTION" == 1 ]]; then
         cmake -DDOWNLOAD_GTEST=ON -DXTENSOR_DISABLE_EXCEPTIONS=ON ..;
       else
-        cmake -DXTENSOR_USE_XSIMD=ON -DDOWNLOAD_GTEST=ON ..;
+        cmake -DDOWNLOAD_GTEST=ON ..;
       fi
-
     - make -j2 test_xtensor_sparse_lib
     - cd test
 script:
