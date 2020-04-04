@@ -164,11 +164,11 @@ add_custom_target(xtest COMMAND test_xtensor_sparse_lib DEPENDS test_xtensor_spa
 # Some files will be compiled twice, however compiling common files in a static
 # library and linking test_xtensor_sparse_lib with it removes half of the tests at
 # runtime.
-add_library(test_xtensor_sparse_core_lib ${XTENSOR_SPARSE_HEADERS})
-target_include_directories(test_xtensor_sparse_core_lib PRIVATE ${XTENSOR_SPARSE_INCLUDE_DIR})
+#add_library(test_xtensor_sparse_core_lib ${XTENSOR_SPARSE_HEADERS})
+#target_include_directories(test_xtensor_sparse_core_lib PRIVATE ${XTENSOR_SPARSE_INCLUDE_DIR})
 
-if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
-    add_dependencies(test_xtensor_sparse_core_lib gtest_main)
-endif()
+#if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
+#    add_dependencies(test_xtensor_sparse_core_lib gtest_main)
+#endif()
 
-target_link_libraries(test_xtensor_sparse_core_lib PRIVATE xtensor-sparse ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(test_xtensor_sparse_core_lib PRIVATE xtensor-sparse ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
