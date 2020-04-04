@@ -19,6 +19,23 @@ set(${PROJECT_NAME}_VERSION
     ${XTENSOR_SPARSE_VERSION_MAJOR}.${XTENSOR_SPARSE_VERSION_MINOR}.${XTENSOR_SPARSE_VERSION_PATCH})
 message(STATUS "Building xtensor-sparse v${${PROJECT_NAME}_VERSION}")
 
+# Dependencies
+# ============
+
+set(xtensor_REQUIRED_VERSION 0.21.4)
+if(TARGET xtensor)
+    set(xtensor_VERSION ${XTENSOR_VERSION_MAJOR}.${XTENSOR_VERSION_MINOR}.${XTENSOR_VERSION_PATCH})
+    # Note: This is not SEMVER compatible comparison
+    if( NOT ${xtENSOR_VERSION} VERSION_GREATER_EQUAL ${xtENSOR_REQUIRED_VERSION})
+        message(ERROR "Mismatch xtensor versions. Found '${xtensor_VERSION}' but requires: '${xtensor_REQUIRED_VERSION}'")
+    else()
+        message(STATUS "Found xtensor v${xtensor_VERSION}")
+    endif()
+else()
+    find_package(xtensor ${xtensor_REQUIRED_VERSION} REQUIRED)
+    message(STATUS "Found xtensor: ${xtensor_INCLUDE_DIRS}/xtensor")
+endif()
+
 # Build
 # =====
 
@@ -34,6 +51,8 @@ target_include_directories(xtensor-sparse INTERFACE
     $<INSTALL_INTERFACE:include>)
 
 target_compile_features(xtensor-sparse INTERFACE cxx_std_14)
+
+target_link_libraries(xtensor-sparse INTERFACE xtensor)
 
 OPTION(BUILD_TESTS "xtensor-sparse test suite" OFF)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
