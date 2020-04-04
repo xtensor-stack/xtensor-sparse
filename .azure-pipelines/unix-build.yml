@@ -1,0 +1,27 @@
+steps:
+  - script: |
+      conda config --set always_yes yes --set changeps1 no
+      conda update -q conda
+      conda env create --file environment-dev.yml
+    displayName: Install dependencies
+
+  - script: |
+      source activate xtensor-sparse
+      mkdir build
+      cd build
+      cmake -DDOWNLOAD_GTEST=ON $(Build.SourcesDirectory)
+    displayName: Configure xtensor-sparse
+    workingDirectory: $(Build.BinariesDirectory)
+      
+  - script: |
+      source activate xtensor-sparse
+      make -j2 test_xtensor_sparse_lib
+    displayName: Build xtensor-sparse
+    workingDirectory: $(Build.BinariesDirectory)/build
+          
+  - script: |
+      source activate xtensor-sparse
+      cd test
+      ./test_xtensor_sparse_lib
+    displayName: Test xtensor-sparse
+    workingDirectory: $(Build.BinariesDirectory)/build/test
