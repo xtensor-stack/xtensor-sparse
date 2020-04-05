@@ -8,6 +8,8 @@
 
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xexception.hpp>
+#include <xtensor/xtensor.hpp>
+#include <xtensor/xio.hpp>
 
 namespace xt
 {
@@ -41,8 +43,8 @@ namespace xt
     private:
 
         using index_type = size_type;
-        using list_index_type = std::vector<index_type>;
-        using container_type = std::map<list_index_type, std::map<index_type, value_type>>;
+        using list_index_type = svector<size_type>;
+        using container_type = std::map<list_index_type, value_type>;
 
         // FIXME: set constexpr
         static const value_type ZERO;
@@ -52,9 +54,6 @@ namespace xt
         template<class... Args>
         reference access_impl(Args... args);
 
-        template<class... Args>
-        std::pair<list_index_type, index_type> build_keys(Args... args) const;
-
         shape_type m_shape;
         container_type m_data;
     };
@@ -63,25 +62,25 @@ namespace xt
     const typename xlil_container<T>::value_type xlil_container<T>::ZERO = 0;
 
     template<class T>
-    xlil_container<T>::xlil_container(const shape_type& shape)
+    inline xlil_container<T>::xlil_container(const shape_type& shape)
      : m_shape{shape}
     {}
 
     template<class T>
-    auto xlil_container<T>::shape() const -> const shape_type&
+    inline auto xlil_container<T>::shape() const -> const shape_type&
     {
         return m_shape;
     }
 
     template<class T>
-    auto xlil_container<T>::dimension() const -> size_type
+    inline auto xlil_container<T>::dimension() const -> size_type
     {
         return m_shape.size();
     }
 
     template<class T>
     template<class... Args>
-    auto xlil_container<T>::operator()(Args... args) const -> const_reference
+    inline auto xlil_container<T>::operator()(Args... args) const -> const_reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -90,7 +89,7 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    auto xlil_container<T>::operator()(Args... args) -> reference
+    inline auto xlil_container<T>::operator()(Args... args) -> reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -99,68 +98,32 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    auto xlil_container<T>::access_impl(Args... args) const -> const_reference
+    inline auto xlil_container<T>::access_impl(Args... args) const -> const_reference
     {
-        list_index_type key1;
-        index_type key2;
+        // TODO: check if all args have the good type
+        list_index_type key{args...};
 
-        std::tie(key1, key2) = build_keys(args...);
-
-        auto it = m_data.find(key1);
+        auto it = m_data.find(key);
         if (it == m_data.end())
         {
             return ZERO;
         }
-        else
-        {
-            auto it2 = it->find(key2);
-            if (it2 == it->end())
-            {
-                return ZERO;
-            }
-            return *it2;
-        }
+        return m_data[key];
     }
 
     template<class T>
     template<class... Args>
-    auto xlil_container<T>::access_impl(Args... args) -> reference
+    inline auto xlil_container<T>::access_impl(Args... args) -> reference
     {
-        list_index_type key1;
-        index_type key2;
+        // TODO: check if all args have the good type
+        list_index_type key{args...};
 
-        std::tie(key1, key2) = build_keys(args...);
-
-        auto it = m_data.find(key1);
+        auto it = m_data.find(key);
         if (it == m_data.end())
         {
-            m_data[key1][key2] = ZERO;
-            return m_data[key1][key2];
+            m_data[key] = ZERO;
         }
-        else
-        {
-            auto it2 = it->second.find(key2);
-            if (it2 == it->second.end())
-            {
-                m_data[key1][key2] = ZERO;
-                return m_data[key1][key2];
-            }
-            return it2->second;
-        }
-    }
-
-    template<class T>
-    template<class... Args>
-    auto xlil_container<T>::build_keys(Args... args) const -> std::pair<list_index_type, index_type>
-    {
-        list_index_type res1;
-        index_type res2;
-
-        std::array<int, sizeof...(Args) + 1> {(res1.push_back(args), 0)..., 0};
-
-        res2 = res1.back();
-        res1.pop_back();
-        return {res1, res2};
+            return m_data[key];
     }
 }
 #endif
