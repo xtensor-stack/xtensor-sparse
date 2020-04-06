@@ -14,6 +14,23 @@
 
 namespace xt
 {
+
+    template <class shape_type, class strides_type>
+    inline void compute_strides(const shape_type& shape, strides_type& strides)
+    {
+        using strides_value_type = typename std::decay_t<strides_type>::value_type;
+        strides_value_type data_size = 1;
+        for (std::size_t i = shape.size(); i != 0; --i)
+        {
+            strides[i - 1] = data_size;
+            data_size = strides[i - 1] * static_cast<strides_value_type>(shape[i - 1]);
+            if (shape[i - 1] == 1)
+            {
+                strides[i - 1] = 0;
+            }
+        }
+    }
+
     template<class T>
     class xmap_container
     {
@@ -29,11 +46,8 @@ namespace xt
 
         using shape_type = svector<size_type>;
         using strides_type = svector<size_type>;
-        using backstrides_type = svector<size_type>;
 
         using inner_shape_type = svector<size_type>;
-        using inner_strides_type = svector<size_type>;
-        using inner_backstrides_type = svector<size_type>;
 
         xmap_container(const shape_type& shape);
 
@@ -41,6 +55,7 @@ namespace xt
 
         const shape_type& shape() const;
         size_type dimension() const;
+        const strides_type& strides() const;
         
         template <class S = shape_type>
         void resize(S&& shape, bool force);
@@ -74,10 +89,10 @@ namespace xt
         void reshape_impl(S&& shape, std::false_type);
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::true_type);
-        template <class S = shape_type>
-        void update_keys(S&& shape);
+        void update_keys(const strides_type& old_strides);
         
         shape_type m_shape;
+        strides_type m_strides;
         container_type m_data;
     };
 
@@ -86,8 +101,9 @@ namespace xt
 
     template<class T>
     inline xmap_container<T>::xmap_container(const shape_type& shape)
-     : m_shape{shape}
-    {}
+    {
+        resize(shape);
+    }
 
     template <class T>
     inline auto xmap_container<T>::size() const noexcept -> size_type
@@ -99,6 +115,12 @@ namespace xt
     inline auto xmap_container<T>::shape() const -> const shape_type&
     {
         return m_shape;
+    }
+
+    template<class T>
+    inline auto xmap_container<T>::strides() const -> const strides_type&
+    {
+        return m_strides;
     }
 
     template<class T>
@@ -115,6 +137,10 @@ namespace xt
         if (m_shape.size() != dim || !std::equal(std::begin(shape), std::end(shape), std::begin(m_shape)) || force)
         {
             m_shape = xtl::forward_sequence<shape_type, S>(shape);
+            strides_type old_strides = strides();
+            resize_container(m_strides, dim);
+            compute_strides(m_shape, m_strides);
+            update_keys(old_strides);
         }
     }
 
@@ -153,8 +179,12 @@ namespace xt
             XTENSOR_THROW(std::runtime_error, "Cannot reshape with incorrect number of elements. Do you mean to resize?");
         }
 
-        update_keys(std::forward<S>(shape));
+        std::size_t dim = shape.size();
+        strides_type old_strides = strides();
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
+        resize_container(m_strides, dim);
+        compute_strides(m_shape, m_strides);
+        update_keys(old_strides);
     }
 
     template <class T>
@@ -190,43 +220,23 @@ namespace xt
             XTENSOR_THROW(std::runtime_error, "Cannot reshape with incorrect number of elements. Do you mean to resize?");
         }
         
-        update_keys(shape);
+        std::size_t dim = shape.size();
+        auto old_strides = strides();
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
+        resize_container(m_strides, dim);
+        compute_strides(m_shape, m_strides);
+        update_keys(old_strides);
     }
 
     template <class T>
-    template <class S>
-    inline void xmap_container<T>::update_keys(S&& shape)
+    inline void xmap_container<T>::update_keys(const strides_type& old_strides)
     {
         container_type new_data;
         for(auto& c: m_data)
         {
             auto& old_key = c.first;
-
-            // compute the offset for the old_key
-            size_type index = 0;
-            size_type accumulator = 1;
-            for (std::size_t i = m_shape.size(); i != 0; --i)
-            {
-                index += old_key[i - 1]*accumulator;
-                accumulator *= m_shape[i - 1];
-            }
-
-            // compute the new key from the offset and the new shape
-            index_type new_key = xtl::make_sequence<index_type>(shape.size());
-            accumulator = 1;
-            for(std::size_t i = 0; i < shape.size(); ++i)
-            {
-                accumulator *= static_cast<size_type>(shape[i]);
-            }
-            
-            for(std::size_t i = 0; i < shape.size(); ++i)
-            {
-                accumulator /= static_cast<size_type>(shape[i]);
-                new_key[i] = index/accumulator;
-                index -= new_key[i]*accumulator;
-            }
-
+            size_type index = element_offset<size_type>(old_strides, old_key.cbegin(), old_key.cend());
+            shape_type new_key = unravel_from_strides(index, strides());
             new_data[new_key] = c.second;
         }
 
