@@ -1,24 +1,24 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <vector>
-#include <xtensor-sparse/xlil.hpp>
+#include <xtensor-sparse/xmap.hpp>
 
 namespace xt
 {
-    TEST(xlil, shaped_constructor)
+    TEST(xmap, shaped_constructor)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xlil_container<double> A(shape);
+        xt::xmap_container<double> A(shape);
 
         EXPECT_EQ(A.dimension(), size_t(2));
         EXPECT_EQ(A.shape()[0], size_t(2));
         EXPECT_EQ(A.shape()[1], size_t(5));
     }
 
-    TEST(xlil, resize)
+    TEST(xmap, resize)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xlil_container<double> A(shape);
+        xt::xmap_container<double> A(shape);
 
         std::vector<std::size_t> new_shape{20, 50};
         A.resize(new_shape);
@@ -26,10 +26,10 @@ namespace xt
         EXPECT_EQ(A.shape()[1], size_t(50));
     }
 
-    TEST(xlil, reshape_unsigned)
+    TEST(xmap, reshape_unsigned)
     {
         std::vector<std::size_t> shape{10};
-        xt::xlil_container<double> A(shape);
+        xt::xmap_container<double> A(shape);
 
         A(1) = 1.;
         A(5) = 5.;
@@ -50,10 +50,10 @@ namespace xt
         EXPECT_EQ(A(1, 2), 7.);
     }
 
-    TEST(xlil, reshape_signed)
+    TEST(xmap, reshape_signed)
     {
         std::vector<std::size_t> shape{20};
-        xt::xlil_container<double> A(shape);
+        xt::xmap_container<double> A(shape);
 
         A(1) = 1.;
         A(5) = 5.;
@@ -75,10 +75,10 @@ namespace xt
         EXPECT_EQ(A(0, 1, 2), 7.);
     }
 
-    TEST(xlil, access_operator)
+    TEST(xmap, access_operator)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xlil_container<double> A(shape);
+        xt::xmap_container<double> A(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;

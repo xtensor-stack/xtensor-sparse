@@ -15,7 +15,7 @@
 namespace xt
 {
     template<class T>
-    class xlil_container
+    class xmap_container
     {
     public:
 
@@ -35,7 +35,7 @@ namespace xt
         using inner_strides_type = svector<size_type>;
         using inner_backstrides_type = svector<size_type>;
 
-        xlil_container(const shape_type& shape);
+        xmap_container(const shape_type& shape);
 
         size_type size() const noexcept;
 
@@ -82,34 +82,34 @@ namespace xt
     };
 
     template<class T>
-    const typename xlil_container<T>::value_type xlil_container<T>::ZERO = 0;
+    const typename xmap_container<T>::value_type xmap_container<T>::ZERO = 0;
 
     template<class T>
-    inline xlil_container<T>::xlil_container(const shape_type& shape)
+    inline xmap_container<T>::xmap_container(const shape_type& shape)
      : m_shape{shape}
     {}
 
     template <class T>
-    inline auto xlil_container<T>::size() const noexcept -> size_type
+    inline auto xmap_container<T>::size() const noexcept -> size_type
     {
         return compute_size(shape());
     }
 
     template<class T>
-    inline auto xlil_container<T>::shape() const -> const shape_type&
+    inline auto xmap_container<T>::shape() const -> const shape_type&
     {
         return m_shape;
     }
 
     template<class T>
-    inline auto xlil_container<T>::dimension() const -> size_type
+    inline auto xmap_container<T>::dimension() const -> size_type
     {
         return m_shape.size();
     }
 
     template <class T>
     template <class S>
-    inline void xlil_container<T>::resize(S&& shape, bool force)
+    inline void xmap_container<T>::resize(S&& shape, bool force)
     {
         std::size_t dim = shape.size();
         if (m_shape.size() != dim || !std::equal(std::begin(shape), std::end(shape), std::begin(m_shape)) || force)
@@ -120,14 +120,14 @@ namespace xt
 
     template <class T>
     template <class S>
-    inline void xlil_container<T>::resize(S&& shape)
+    inline void xmap_container<T>::resize(S&& shape)
     {
         resize(std::forward<S>(shape), true);
     }
 
     template <class T>
     template <class S>
-    inline auto& xlil_container<T>::reshape(S&& shape) &
+    inline auto& xmap_container<T>::reshape(S&& shape) &
     {
         reshape_impl(std::forward<S>(shape), std::is_signed<std::decay_t<typename std::decay_t<S>::value_type>>());
         return *this;
@@ -135,7 +135,7 @@ namespace xt
 
     template <class T>
     template <class TT>
-    inline auto& xlil_container<T>::reshape(std::initializer_list<TT> shape) &
+    inline auto& xmap_container<T>::reshape(std::initializer_list<TT> shape) &
     {
         using sh_type = rebind_container_t<T, shape_type>;
         sh_type sh = xtl::make_sequence<sh_type>(shape.size());
@@ -146,7 +146,7 @@ namespace xt
     
     template <class T>
     template <class S>
-    inline void xlil_container<T>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
+    inline void xmap_container<T>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
     {
         if (compute_size(shape) != this->size())
         {
@@ -159,7 +159,7 @@ namespace xt
 
     template <class T>
     template <class S>
-    inline void xlil_container<T>::reshape_impl(S&& _shape, std::true_type /* is signed */)
+    inline void xmap_container<T>::reshape_impl(S&& _shape, std::true_type /* is signed */)
     {
         using value_type = typename std::decay_t<S>::value_type;
         auto new_size = compute_size(_shape);
@@ -196,7 +196,7 @@ namespace xt
 
     template <class T>
     template <class S>
-    inline void xlil_container<T>::update_keys(S&& shape)
+    inline void xmap_container<T>::update_keys(S&& shape)
     {
         container_type new_data;
         for(auto& c: m_data)
@@ -235,7 +235,7 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    inline auto xlil_container<T>::operator()(Args... args) const -> const_reference
+    inline auto xmap_container<T>::operator()(Args... args) const -> const_reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -244,7 +244,7 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    inline auto xlil_container<T>::operator()(Args... args) -> reference
+    inline auto xmap_container<T>::operator()(Args... args) -> reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -253,7 +253,7 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    inline auto xlil_container<T>::access_impl(Args... args) const -> const_reference
+    inline auto xmap_container<T>::access_impl(Args... args) const -> const_reference
     {
         // TODO: check if all args have the good type
         index_type key{static_cast<size_type>(args)...};
@@ -268,13 +268,14 @@ namespace xt
 
     template<class T>
     template<class... Args>
-    inline auto xlil_container<T>::access_impl(Args... args) -> reference
+    inline auto xmap_container<T>::access_impl(Args... args) -> reference
     {
         // TODO: check if all args have the good type
         index_type key{static_cast<size_type>(args)...};
 
         auto it = m_data.find(key);
         if (it == m_data.end())
+        {
             m_data[key] = ZERO;
         }
             return m_data[key];
