@@ -1,5 +1,5 @@
-#ifndef XTENSOR_SPARSE_LIL_HPP
-#define XTENSOR_SPARSE_LIL_HPP
+#ifndef XTENSOR_SPARSE_MAP_CONTAINER_HPP
+#define XTENSOR_SPARSE_MAP_CONTAINER_HPP
 
 #include <array>
 #include <map>
@@ -28,7 +28,6 @@ namespace xt
         using difference_type = std::ptrdiff_t;
 
         using shape_type = svector<size_type>;
-        using strides_type = svector<size_type>;
 
         using inner_shape_type = svector<size_type>;
 
@@ -38,7 +37,6 @@ namespace xt
 
         const shape_type& shape() const;
         size_type dimension() const;
-        const strides_type& strides() const;
         
         template <class S = shape_type>
         void resize(S&& shape, bool force);
@@ -57,6 +55,7 @@ namespace xt
 
     private:
 
+        using strides_type = svector<size_type>;
         using index_type = svector<size_type>;
         using container_type = std::map<index_type, value_type>;
 
@@ -67,6 +66,8 @@ namespace xt
         const_reference access_impl(Args... args) const;
         template<class... Args>
         reference access_impl(Args... args);
+
+        const strides_type& strides() const;
 
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::false_type);
