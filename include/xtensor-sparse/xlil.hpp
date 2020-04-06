@@ -42,9 +42,8 @@ namespace xt
 
     private:
 
-        using index_type = size_type;
-        using list_index_type = svector<size_type>;
-        using container_type = std::map<list_index_type, value_type>;
+        using index_type = svector<size_type>;
+        using container_type = std::map<index_type, value_type>;
 
         // FIXME: set constexpr
         static const value_type ZERO;
@@ -101,7 +100,7 @@ namespace xt
     inline auto xlil_container<T>::access_impl(Args... args) const -> const_reference
     {
         // TODO: check if all args have the good type
-        list_index_type key{args...};
+        index_type key{static_cast<size_type>(args)...};
 
         auto it = m_data.find(key);
         if (it == m_data.end())
@@ -116,11 +115,11 @@ namespace xt
     inline auto xlil_container<T>::access_impl(Args... args) -> reference
     {
         // TODO: check if all args have the good type
+<<<<<<< HEAD
         list_index_type key{args...};
-
-        auto it = m_data.find(key);
+=======
+        index_type key{static_cast<size_type>(args)...};
         if (it == m_data.end())
-        {
             m_data[key] = ZERO;
         }
             return m_data[key];
