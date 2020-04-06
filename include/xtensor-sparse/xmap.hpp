@@ -14,23 +14,6 @@
 
 namespace xt
 {
-
-    template <class shape_type, class strides_type>
-    inline void compute_strides(const shape_type& shape, strides_type& strides)
-    {
-        using strides_value_type = typename std::decay_t<strides_type>::value_type;
-        strides_value_type data_size = 1;
-        for (std::size_t i = shape.size(); i != 0; --i)
-        {
-            strides[i - 1] = data_size;
-            data_size = strides[i - 1] * static_cast<strides_value_type>(shape[i - 1]);
-            if (shape[i - 1] == 1)
-            {
-                strides[i - 1] = 0;
-            }
-        }
-    }
-
     template<class T>
     class xmap_container
     {
@@ -139,7 +122,7 @@ namespace xt
             m_shape = xtl::forward_sequence<shape_type, S>(shape);
             strides_type old_strides = strides();
             resize_container(m_strides, dim);
-            compute_strides(m_shape, m_strides);
+            compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
             update_keys(old_strides);
         }
     }
@@ -183,7 +166,7 @@ namespace xt
         strides_type old_strides = strides();
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
-        compute_strides(m_shape, m_strides);
+        compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
         update_keys(old_strides);
     }
 
@@ -224,7 +207,7 @@ namespace xt
         auto old_strides = strides();
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
-        compute_strides(m_shape, m_strides);
+        compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
         update_keys(old_strides);
     }
 
