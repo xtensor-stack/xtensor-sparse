@@ -40,7 +40,7 @@ endif()
 # =====
 
 set(XTENSOR_SPARSE_HEADERS
-    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xlil.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_container.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xtensor_sparse_config.hpp
 )
 
