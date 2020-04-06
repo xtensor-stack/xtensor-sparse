@@ -14,30 +14,32 @@
 
 namespace xt
 {
-    template<class T>
+    template<class D>
     class xmap_container
     {
     public:
 
-        using value_type = T;
-        using const_reference = const T&;
-        using reference = T&;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using size_type = std::size_t;
-        using difference_type = std::ptrdiff_t;
+        using derived_type = D;
 
-        using shape_type = svector<size_type>;
+        using inner_types = xcontainer_inner_types<D>;
+        using storage_type = typename inner_types::storage_type;
+        using index_type = typename inner_types::index_type;
+        using value_type = typename storage_type::mapped_type;
+        using reference = typename inner_types::reference;
+        using const_reference = typename inner_types::const_reference;
+        using pointer = typename storage_type::pointer;
+        using const_pointer = typename storage_type::const_pointer;
+        using size_type = typename inner_types::size_type;
+        using difference_type = typename storage_type::difference_type;
 
-        using inner_shape_type = svector<size_type>;
-
-        xmap_container(const shape_type& shape);
+        using shape_type = typename inner_types::shape_type;
+        using inner_shape_type = typename inner_types::inner_shape_type;
 
         size_type size() const noexcept;
 
-        const shape_type& shape() const;
-        size_type dimension() const;
-        
+        XTENSOR_CONSTEXPR_RETURN const inner_shape_type& shape() const noexcept;
+        XTENSOR_CONSTEXPR_RETURN size_type dimension() const noexcept;
+
         template <class S = shape_type>
         void resize(S&& shape, bool force);
         template <class S = shape_type>
@@ -45,77 +47,86 @@ namespace xt
 
         template <class S = shape_type>
         auto& reshape(S&& shape) &;
-        template <class TT>
-        auto& reshape(std::initializer_list<TT> shape) &;
+        template <class T>
+        auto& reshape(std::initializer_list<T> shape) &;
 
-        template<class... Args>
-        const_reference operator()(Args... args) const;
-        template<class... Args>
+        const storage_type& storage() const noexcept;
+        storage_type& storage() noexcept;
+
+        template <class... Args>
         reference operator()(Args... args);
+
+        template <class... Args>
+        const_reference operator()(Args... args) const;
+
+    protected:
+
+        using strides_type = typename inner_types::strides_type;
+
+        xmap_container() = default;
+        ~xmap_container() = default;
+
+        xmap_container(const xmap_container&) = default;
+        xmap_container& operator=(const xmap_container&) = default;
+
+        xmap_container(xmap_container&&) = default;
+        xmap_container& operator=(xmap_container&&) = default;
+
+        derived_type& derived_cast() & noexcept;
+        const derived_type& derived_cast() const & noexcept;
+        derived_type derived_cast() && noexcept;
 
     private:
 
-        using strides_type = svector<size_type>;
-        using index_type = svector<size_type>;
-        using container_type = std::map<index_type, value_type>;
-
-        // FIXME: set constexpr
         static const value_type ZERO;
+
+        XTENSOR_CONSTEXPR_RETURN const strides_type& strides() const noexcept;
 
         template<class... Args>
         const_reference access_impl(Args... args) const;
         template<class... Args>
         reference access_impl(Args... args);
 
-        const strides_type& strides() const;
-
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::false_type);
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::true_type);
         void update_keys(const strides_type& old_strides);
-        
-        shape_type m_shape;
+
+        inner_shape_type m_shape;
         strides_type m_strides;
-        container_type m_data;
     };
 
-    template<class T>
-    const typename xmap_container<T>::value_type xmap_container<T>::ZERO = 0;
+    template<class D>
+    const typename xmap_container<D>::value_type xmap_container<D>::ZERO = 0;
 
-    template<class T>
-    inline xmap_container<T>::xmap_container(const shape_type& shape)
-    {
-        resize(shape);
-    }
-
-    template <class T>
-    inline auto xmap_container<T>::size() const noexcept -> size_type
+    template <class D>
+    inline auto xmap_container<D>::size() const noexcept -> size_type
     {
         return compute_size(shape());
     }
 
-    template<class T>
-    inline auto xmap_container<T>::shape() const -> const shape_type&
+    template <class D>
+    XTENSOR_CONSTEXPR_RETURN auto xmap_container<D>::dimension() const noexcept -> size_type
+    {
+        return shape().size();
+    }
+
+    template <class D>
+    XTENSOR_CONSTEXPR_RETURN auto xmap_container<D>::shape() const noexcept -> const inner_shape_type&
     {
         return m_shape;
     }
 
-    template<class T>
-    inline auto xmap_container<T>::strides() const -> const strides_type&
+    template <class D>
+    XTENSOR_CONSTEXPR_RETURN auto xmap_container<D>::strides() const noexcept -> const strides_type&
     {
         return m_strides;
     }
 
-    template<class T>
-    inline auto xmap_container<T>::dimension() const -> size_type
-    {
-        return m_shape.size();
-    }
-
-    template <class T>
+    template <class D>
     template <class S>
-    inline void xmap_container<T>::resize(S&& shape, bool force)
+    inline void xmap_container<D>::resize(S&& shape, bool force)
     {
         std::size_t dim = shape.size();
         if (m_shape.size() != dim || !std::equal(std::begin(shape), std::end(shape), std::begin(m_shape)) || force)
@@ -128,35 +139,35 @@ namespace xt
         }
     }
 
-    template <class T>
+    template <class D>
     template <class S>
-    inline void xmap_container<T>::resize(S&& shape)
+    inline void xmap_container<D>::resize(S&& shape)
     {
         resize(std::forward<S>(shape), true);
     }
 
-    template <class T>
+    template <class D>
     template <class S>
-    inline auto& xmap_container<T>::reshape(S&& shape) &
+    inline auto& xmap_container<D>::reshape(S&& shape) &
     {
         reshape_impl(std::forward<S>(shape), std::is_signed<std::decay_t<typename std::decay_t<S>::value_type>>());
         return *this;
     }
 
+    template <class D>
     template <class T>
-    template <class TT>
-    inline auto& xmap_container<T>::reshape(std::initializer_list<TT> shape) &
+    inline auto& xmap_container<D>::reshape(std::initializer_list<T> shape) &
     {
-        using sh_type = rebind_container_t<T, shape_type>;
+        using sh_type = rebind_container_t<D, shape_type>;
         sh_type sh = xtl::make_sequence<sh_type>(shape.size());
         std::copy(shape.begin(), shape.end(), sh.begin());
-        reshape_impl(std::move(sh), std::is_signed<TT>());
+        reshape_impl(std::move(sh), std::is_signed<T>());
         return *this;
     }
     
-    template <class T>
+    template <class D>
     template <class S>
-    inline void xmap_container<T>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
+    inline void xmap_container<D>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
     {
         if (compute_size(shape) != this->size())
         {
@@ -171,9 +182,9 @@ namespace xt
         update_keys(old_strides);
     }
 
-    template <class T>
+    template <class D>
     template <class S>
-    inline void xmap_container<T>::reshape_impl(S&& _shape, std::true_type /* is signed */)
+    inline void xmap_container<D>::reshape_impl(S&& _shape, std::true_type /* is signed */)
     {
         using value_type = typename std::decay_t<S>::value_type;
         auto new_size = compute_size(_shape);
@@ -212,11 +223,71 @@ namespace xt
         update_keys(old_strides);
     }
 
-    template <class T>
-    inline void xmap_container<T>::update_keys(const strides_type& old_strides)
+    template <class D>
+    inline auto xmap_container<D>::storage() const noexcept -> const storage_type&
     {
-        container_type new_data;
-        for(auto& c: m_data)
+        return derived_cast().storage_impl();
+    }
+
+    template <class D>
+    inline auto xmap_container<D>::storage() noexcept -> storage_type&
+    {
+        return derived_cast().storage_impl();
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xmap_container<D>::operator()(Args... args) const -> const_reference
+    {
+        XTENSOR_TRY(check_index(shape(), args...));
+        XTENSOR_CHECK_DIMENSION(shape(), args...);
+        return access_impl(args...);
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xmap_container<D>::operator()(Args... args) -> reference
+    {
+        XTENSOR_TRY(check_index(shape(), args...));
+        XTENSOR_CHECK_DIMENSION(shape(), args...);
+        return access_impl(args...);
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xmap_container<D>::access_impl(Args... args) const -> const_reference
+    {
+        // TODO: check if all args have the good type
+        index_type key{static_cast<size_type>(args)...};
+
+        auto it = storage().find(key);
+        if (it == storage().end())
+        {
+            return ZERO;
+        }
+        return storage()[key];
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xmap_container<D>::access_impl(Args... args) -> reference
+    {
+        // TODO: check if all args have the good type
+        index_type key{static_cast<size_type>(args)...};
+
+        auto it = storage().find(key);
+        if (it == storage().end())
+        {
+            storage()[key] = ZERO;
+        }
+        return storage()[key];
+    }
+
+    template <class D>
+    inline void xmap_container<D>::update_keys(const strides_type& old_strides)
+    {
+        storage_type new_data;
+        for(auto& c: storage())
         {
             auto& old_key = c.first;
             size_type index = element_offset<size_type>(old_strides, old_key.cbegin(), old_key.cend());
@@ -224,56 +295,104 @@ namespace xt
             new_data[new_key] = c.second;
         }
 
-        std::swap(m_data, new_data);
+        std::swap(storage(), new_data);
     }
 
-    template<class T>
-    template<class... Args>
-    inline auto xmap_container<T>::operator()(Args... args) const -> const_reference
+    template <class D>
+    inline auto xmap_container<D>::derived_cast() & noexcept -> derived_type&
     {
-        XTENSOR_TRY(check_index(shape(), args...));
-        XTENSOR_CHECK_DIMENSION(shape(), args...);
-        return access_impl(args...);
+        return *static_cast<derived_type*>(this);
     }
 
-    template<class T>
-    template<class... Args>
-    inline auto xmap_container<T>::operator()(Args... args) -> reference
+    template <class D>
+    inline auto xmap_container<D>::derived_cast() const & noexcept -> const derived_type&
     {
-        XTENSOR_TRY(check_index(shape(), args...));
-        XTENSOR_CHECK_DIMENSION(shape(), args...);
-        return access_impl(args...);
+        return *static_cast<const derived_type*>(this);
     }
 
-    template<class T>
-    template<class... Args>
-    inline auto xmap_container<T>::access_impl(Args... args) const -> const_reference
+    template <class D>
+    inline auto xmap_container<D>::derived_cast() && noexcept -> derived_type
     {
-        // TODO: check if all args have the good type
-        index_type key{static_cast<size_type>(args)...};
-
-        auto it = m_data.find(key);
-        if (it == m_data.end())
-        {
-            return ZERO;
-        }
-        return m_data[key];
+        return *static_cast<derived_type*>(this);
     }
 
-    template<class T>
-    template<class... Args>
-    inline auto xmap_container<T>::access_impl(Args... args) -> reference
+    template<class EC>
+    class xmap_array: public xmap_container<xmap_array<EC>> 
     {
-        // TODO: check if all args have the good type
-        index_type key{static_cast<size_type>(args)...};
+    public:
 
-        auto it = m_data.find(key);
-        if (it == m_data.end())
-        {
-            m_data[key] = ZERO;
-        }
-        return m_data[key];
+        using self_type = xmap_array<EC>;
+        using base_type = xmap_container<self_type>;
+        using storage_type = typename base_type::storage_type;
+        using index_type = typename base_type::index_type;
+        using value_type = typename base_type::value_type;
+        using reference = typename base_type::reference;
+        using const_reference = typename base_type::const_reference;
+        using pointer = typename base_type::pointer;
+        using const_pointer = typename base_type::const_pointer;
+        using shape_type = typename base_type::shape_type;
+        using inner_shape_type = typename base_type::inner_shape_type;
+
+        // xmap_array();
+        explicit xmap_array(const shape_type& shape);
+
+        ~xmap_array() = default;
+
+        xmap_array(const xmap_array&) = default;
+        xmap_array& operator=(const xmap_array&) = default;
+
+        xmap_array(xmap_array&&) = default;
+        xmap_array& operator=(xmap_array&&) = default;
+
+    private:
+
+        using strides_type = typename base_type::strides_type;
+
+        storage_type m_storage;
+
+        storage_type& storage_impl() noexcept;
+        const storage_type& storage_impl() const noexcept;
+
+        friend class xmap_container<xmap_array<EC>>;
+    };
+
+    template<class EC>
+    inline xmap_array<EC>::xmap_array(const shape_type& shape)
+        : base_type()
+    {
+        base_type::resize(shape);
     }
+
+    template<class EC>
+    inline auto xmap_array<EC>::storage_impl() const noexcept -> const storage_type&
+    {
+        return m_storage;
+    }
+
+    template<class EC>
+    inline auto xmap_array<EC>::storage_impl() noexcept -> storage_type&
+    {
+        return m_storage;
+    }
+
+    template<class EC>
+    struct xcontainer_inner_types<xmap_array<EC>>
+    {
+        using value_type = EC;
+        using reference = EC&;
+        using const_reference = const EC&;
+        using pointer = EC*;
+        using const_pointer = const EC*;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+
+        using index_type = svector<size_type>;
+        using storage_type = std::map<index_type, value_type>;
+
+        using shape_type = svector<size_type>;
+        using strides_type = svector<size_type>;
+        using inner_shape_type = svector<size_type>;
+    };
 }
 #endif
 

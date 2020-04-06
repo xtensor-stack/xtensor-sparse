@@ -8,7 +8,7 @@ namespace xt
     TEST(xmap, shaped_constructor)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xmap_container<double> A(shape);
+        xt::xmap_array<double> A(shape);
 
         EXPECT_EQ(A.dimension(), size_t(2));
         EXPECT_EQ(A.shape()[0], size_t(2));
@@ -18,7 +18,7 @@ namespace xt
     TEST(xmap, resize)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xmap_container<double> A(shape);
+        xt::xmap_array<double> A(shape);
 
         std::vector<std::size_t> new_shape{20, 50};
         A.resize(new_shape);
@@ -29,7 +29,7 @@ namespace xt
     TEST(xmap, reshape_unsigned)
     {
         std::vector<std::size_t> shape{10};
-        xt::xmap_container<double> A(shape);
+        xt::xmap_array<double> A(shape);
 
         A(1) = 1.;
         A(5) = 5.;
@@ -53,7 +53,7 @@ namespace xt
     TEST(xmap, reshape_signed)
     {
         std::vector<std::size_t> shape{20};
-        xt::xmap_container<double> A(shape);
+        xt::xmap_array<double> A(shape);
 
         A(1) = 1.;
         A(5) = 5.;
@@ -78,7 +78,7 @@ namespace xt
     TEST(xmap, access_operator)
     {
         std::vector<std::size_t> shape{2, 5};
-        xt::xmap_container<double> A(shape);
+        xt::xmap_array<double> A(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
