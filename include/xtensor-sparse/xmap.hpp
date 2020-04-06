@@ -288,7 +288,7 @@ namespace xt
         {
             m_data[key] = ZERO;
         }
-            return m_data[key];
+        return m_data[key];
     }
 }
 #endif
