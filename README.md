@@ -1,5 +1,10 @@
 # xtensor-sparse
 
+[![Travis](https://travis-ci.com/xtensor-stack/xtensor-sparse.svg?branch=master)](https://travis-ci.org/xtensor-stack/xtensor)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/aubhh8lvrihw2odx/branch/master?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xtensor-sparse/branch/master)
+[![Azure](https://dev.azure.com/xtensor-stack/xtensor-stack/_apis/build/status/xtensor-stack.xtensor-sparse?branchName=master)](https://dev.azure.com/xtensor-stack/xtensor-stack/_build/latest?definitionId=4&branchName=master)
+[![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Multi-dimensional sparse arrays based on [xtensor](https://github.com/xtensor-stack/xtensor)
 
 ## Introduction
