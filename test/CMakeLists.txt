@@ -136,7 +136,8 @@ include_directories(${GTEST_INCLUDE_DIRS} SYSTEM)
 
 set(XTENSOR_SPARSE_TESTS
     main.cpp
-    test_xmap.cpp
+    test_xmap_array.cpp
+    test_xmap_tensor.cpp
 )
 
 foreach(filename IN LISTS XTENSOR_SPARSE_TESTS)
