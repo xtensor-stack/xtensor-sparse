@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
-#include <iostream>
 #include <vector>
-#include <xtensor-sparse/xmap_container.hpp>
+#include <xtensor-sparse/xmap_tensor.hpp>
 
 namespace xt
 {

@@ -68,14 +68,14 @@ namespace xt
     template <class C>
     inline auto xsparse_reference<C>::operator=(const self_type& rhs) -> self_type&
     {
-        update_value(rhs);
+        update_value(rhs.m_value);
         return *this;
     }
 
     template <class C>
     inline auto xsparse_reference<C>::operator=(self_type&& rhs) -> self_type&
     {
-        update_value(rhs);
+        update_value(rhs.m_value);
         return *this;
     }
 
