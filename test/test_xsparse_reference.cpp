@@ -58,6 +58,22 @@ namespace xt
         m_data.erase(index);
     }
 
+    TEST(xsparse_reference, assign_semantic)
+    {
+        sparse_tester t;
+
+        sparse_ref r1(t, 1, 2.);
+        sparse_ref r2(t, 3, 4.5);
+        r1 = r2;
+        sparse_tester::map_type exp1 = {{1, 4.5}, {3, 4.5}, {9, 2.7}};
+        EXPECT_EQ(t.data(), exp1);
+
+        sparse_ref r3(t, 9, 2.7);
+        r2 = std::move(r3);
+        sparse_tester::map_type exp2 = {{1, 4.5}, {3, 2.7}, {9, 2.7}};
+        EXPECT_EQ(t.data(), exp2);
+    }
+
     TEST(xsparse_reference, assign)
     {
         sparse_tester t;
