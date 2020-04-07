@@ -14,6 +14,10 @@
 
 namespace xt
 {
+    /******************************
+     * xmap_container declaration *
+     ******************************/
+
     template<class D>
     class xmap_container
     {
@@ -63,7 +67,7 @@ namespace xt
 
         using strides_type = typename inner_types::strides_type;
 
-        xmap_container() = default;
+        xmap_container();
         ~xmap_container() = default;
 
         xmap_container(const xmap_container&) = default;
@@ -91,14 +95,25 @@ namespace xt
         void reshape_impl(S&& shape, std::false_type);
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::true_type);
-        void update_keys(const strides_type& old_strides);
+        void update_entries(const strides_type& old_strides);
 
         inner_shape_type m_shape;
         strides_type m_strides;
     };
 
+    /*********************************
+     * xmap_container implementation *
+     *********************************/
+
     template<class D>
     const typename xmap_container<D>::value_type xmap_container<D>::ZERO = 0;
+
+    template<class D>
+    xmap_container<D>::xmap_container()
+    {
+        m_shape = xtl::make_sequence<inner_shape_type>(dimension(), 0);
+        m_strides = xtl::make_sequence<strides_type>(dimension(), 0);
+    }
 
     template <class D>
     inline auto xmap_container<D>::size() const noexcept -> size_type
@@ -135,7 +150,7 @@ namespace xt
             strides_type old_strides = strides();
             resize_container(m_strides, dim);
             compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-            update_keys(old_strides);
+            update_entries(old_strides);
         }
     }
 
@@ -179,7 +194,7 @@ namespace xt
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        update_keys(old_strides);
+        update_entries(old_strides);
     }
 
     template <class D>
@@ -220,7 +235,7 @@ namespace xt
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        update_keys(old_strides);
+        update_entries(old_strides);
     }
 
     template <class D>
@@ -284,7 +299,7 @@ namespace xt
     }
 
     template <class D>
-    inline void xmap_container<D>::update_keys(const strides_type& old_strides)
+    inline void xmap_container<D>::update_entries(const strides_type& old_strides)
     {
         storage_type new_data;
         for(auto& c: storage())
@@ -316,12 +331,16 @@ namespace xt
         return *static_cast<derived_type*>(this);
     }
 
-    template<class EC>
-    class xmap_array: public xmap_container<xmap_array<EC>> 
+    /**************************
+     * xmap_array declaration *
+     **************************/
+
+    template<class T>
+    class xmap_array: public xmap_container<xmap_array<T>> 
     {
     public:
 
-        using self_type = xmap_array<EC>;
+        using self_type = xmap_array<T>;
         using base_type = xmap_container<self_type>;
         using storage_type = typename base_type::storage_type;
         using index_type = typename base_type::index_type;
@@ -333,7 +352,7 @@ namespace xt
         using shape_type = typename base_type::shape_type;
         using inner_shape_type = typename base_type::inner_shape_type;
 
-        // xmap_array();
+        xmap_array();
         explicit xmap_array(const shape_type& shape);
 
         ~xmap_array() = default;
@@ -353,36 +372,44 @@ namespace xt
         storage_type& storage_impl() noexcept;
         const storage_type& storage_impl() const noexcept;
 
-        friend class xmap_container<xmap_array<EC>>;
+        friend class xmap_container<xmap_array<T>>;
     };
 
-    template<class EC>
-    inline xmap_array<EC>::xmap_array(const shape_type& shape)
+    /*****************************
+     * xmap_array implementation *
+     *****************************/
+    template<class T>
+    inline xmap_array<T>::xmap_array()
+        : base_type()
+    {}
+
+    template<class T>
+    inline xmap_array<T>::xmap_array(const shape_type& shape)
         : base_type()
     {
         base_type::resize(shape);
     }
 
-    template<class EC>
-    inline auto xmap_array<EC>::storage_impl() const noexcept -> const storage_type&
+    template<class T>
+    inline auto xmap_array<T>::storage_impl() const noexcept -> const storage_type&
     {
         return m_storage;
     }
 
-    template<class EC>
-    inline auto xmap_array<EC>::storage_impl() noexcept -> storage_type&
+    template<class T>
+    inline auto xmap_array<T>::storage_impl() noexcept -> storage_type&
     {
         return m_storage;
     }
 
-    template<class EC>
-    struct xcontainer_inner_types<xmap_array<EC>>
+    template<class T>
+    struct xcontainer_inner_types<xmap_array<T>>
     {
-        using value_type = EC;
-        using reference = EC&;
-        using const_reference = const EC&;
-        using pointer = EC*;
-        using const_pointer = const EC*;
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
 
@@ -391,7 +418,98 @@ namespace xt
 
         using shape_type = svector<size_type>;
         using strides_type = svector<size_type>;
-        using inner_shape_type = svector<size_type>;
+        using inner_shape_type = shape_type;
+    };
+
+    /***************************
+     * xmap_tensor declaration *
+     ***************************/
+
+    template<class T, std::size_t N>
+    class xmap_tensor: public xmap_container<xmap_tensor<T, N>> 
+    {
+    public:
+
+        using self_type = xmap_tensor<T, N>;
+        using base_type = xmap_container<self_type>;
+        using storage_type = typename base_type::storage_type;
+        using index_type = typename base_type::index_type;
+        using value_type = typename base_type::value_type;
+        using reference = typename base_type::reference;
+        using const_reference = typename base_type::const_reference;
+        using pointer = typename base_type::pointer;
+        using const_pointer = typename base_type::const_pointer;
+        using shape_type = typename base_type::shape_type;
+        using inner_shape_type = typename base_type::inner_shape_type;
+
+        xmap_tensor();
+        explicit xmap_tensor(const shape_type& shape);
+
+        ~xmap_tensor() = default;
+
+        xmap_tensor(const xmap_tensor&) = default;
+        xmap_tensor& operator=(const xmap_tensor&) = default;
+
+        xmap_tensor(xmap_tensor&&) = default;
+        xmap_tensor& operator=(xmap_tensor&&) = default;
+
+    private:
+
+        using strides_type = typename base_type::strides_type;
+
+        storage_type m_storage;
+
+        storage_type& storage_impl() noexcept;
+        const storage_type& storage_impl() const noexcept;
+
+        friend class xmap_container<xmap_tensor<T, N>>;
+    };
+
+    /******************************
+     * xmap_tensor implementation *
+     ******************************/
+
+    template<class T, std::size_t N>
+    inline xmap_tensor<T, N>::xmap_tensor()
+        : base_type()
+    {}
+
+    template<class T, std::size_t N>
+    inline xmap_tensor<T, N>::xmap_tensor(const shape_type& shape)
+        : base_type()
+    {
+        base_type::resize(shape);
+    }
+
+    template<class T, std::size_t N>
+    inline auto xmap_tensor<T, N>::storage_impl() const noexcept -> const storage_type&
+    {
+        return m_storage;
+    }
+
+    template<class T, std::size_t N>
+    inline auto xmap_tensor<T, N>::storage_impl() noexcept -> storage_type&
+    {
+        return m_storage;
+    }
+
+    template<class T, std::size_t N>
+    struct xcontainer_inner_types<xmap_tensor<T, N>>
+    {
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+
+        using index_type = std::array<size_type, N>;
+        using storage_type = std::map<index_type, value_type>;
+
+        using shape_type = std::array<size_type, N>;
+        using strides_type = std::array<size_type, N>;
+        using inner_shape_type = shape_type;
     };
 }
 #endif

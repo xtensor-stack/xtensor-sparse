@@ -5,7 +5,7 @@
 
 namespace xt
 {
-    TEST(xmap, shaped_constructor)
+    TEST(xmap_array, shaped_constructor)
     {
         std::vector<std::size_t> shape{2, 5};
         xt::xmap_array<double> A(shape);
@@ -15,7 +15,7 @@ namespace xt
         EXPECT_EQ(A.shape()[1], size_t(5));
     }
 
-    TEST(xmap, resize)
+    TEST(xmap_array, resize)
     {
         std::vector<std::size_t> shape{2, 5};
         xt::xmap_array<double> A(shape);
@@ -26,7 +26,7 @@ namespace xt
         EXPECT_EQ(A.shape()[1], size_t(50));
     }
 
-    TEST(xmap, reshape_unsigned)
+    TEST(xmap_array, reshape_unsigned)
     {
         std::vector<std::size_t> shape{10};
         xt::xmap_array<double> A(shape);
@@ -50,7 +50,7 @@ namespace xt
         EXPECT_EQ(A(1, 2), 7.);
     }
 
-    TEST(xmap, reshape_signed)
+    TEST(xmap_array, reshape_signed)
     {
         std::vector<std::size_t> shape{20};
         xt::xmap_array<double> A(shape);
@@ -75,7 +75,7 @@ namespace xt
         EXPECT_EQ(A(0, 1, 2), 7.);
     }
 
-    TEST(xmap, access_operator)
+    TEST(xmap_array, access_operator)
     {
         std::vector<std::size_t> shape{2, 5};
         xt::xmap_array<double> A(shape);
