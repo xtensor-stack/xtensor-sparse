@@ -5,6 +5,8 @@
 #include <xtensor/xtensor_forward.hpp>
 #include <xtensor/xutils.hpp>
 
+#include "xsparse_reference.hpp"
+
 namespace xt
 {
     /******************************
@@ -75,6 +77,8 @@ namespace xt
 
     private:
 
+        using true_pointer = value_type*;
+
         static const value_type ZERO;
 
         const strides_type& strides() const noexcept;
@@ -90,8 +94,14 @@ namespace xt
         void reshape_impl(S&& shape, std::true_type);
         void update_entries(const strides_type& old_strides);
 
+        true_pointer find_element(const index_type& index);
+        void insert_element(const index_type& index, const_reference value);
+        void remove_element(const index_type& index);
+
         inner_shape_type m_shape;
         strides_type m_strides;
+
+        friend class xsparse_reference<xmap_container<D>>;
     };
 
     /*********************************
@@ -284,11 +294,8 @@ namespace xt
         index_type key{static_cast<size_type>(args)...};
 
         auto it = storage().find(key);
-        if (it == storage().end())
-        {
-            storage()[key] = ZERO;
-        }
-        return storage()[key];
+        value_type v = it == storage().end() ? value_type() : it->second;
+        return reference(*this, std::move(key), v);
     }
 
     template <class D>
@@ -304,6 +311,25 @@ namespace xt
         }
 
         std::swap(storage(), new_data);
+    }
+
+    template <class D>
+    inline auto xmap_container<D>::find_element(const index_type& index) -> true_pointer
+    {
+        auto it = storage().find(index);
+        return it == storage().end() ? nullptr : &it->second;
+    }
+
+    template <class D>
+    inline void xmap_container<D>::insert_element(const index_type& index, const_reference value)
+    {
+        storage().insert({index, value});
+    }
+
+    template <class D>
+    inline void xmap_container<D>::remove_element(const index_type& index)
+    {
+        storage().erase(index);
     }
 
     template <class D>

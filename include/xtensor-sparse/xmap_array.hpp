@@ -18,8 +18,9 @@ namespace xt
     template<class T>
     struct xcontainer_inner_types<xmap_array<T>>
     {
+        using base_type = xmap_container<xmap_array<T>>;
         using value_type = T;
-        using reference = T&;
+        using reference = xsparse_reference<base_type>;
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
