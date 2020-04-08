@@ -16,8 +16,9 @@ namespace xt
     template<class T, std::size_t N>
     struct xcontainer_inner_types<xmap_tensor<T, N>>
     {
+        using base_type = xmap_container<xmap_tensor<T, N>>;
         using value_type = T;
-        using reference = T&;
+        using reference = xsparse_reference<base_type>;
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
