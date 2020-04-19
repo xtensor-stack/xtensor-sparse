@@ -2,8 +2,6 @@
 #define XSPARSE_XSPARSE_CONTAINER_HPP
 
 #include <xtensor/xstrides.hpp>
-#include <xtensor/xtensor_forward.hpp>
-#include <xtensor/xutils.hpp>
 
 #include "xsparse_reference.hpp"
 
@@ -92,9 +90,9 @@ namespace xt
         friend class xsparse_reference<xsparse_container<D>>;
     };
 
-    /*********************************
+    /************************************
      * xsparse_container implementation *
-     *********************************/
+     ************************************/
 
     template<class D>
     xsparse_container<D>::xsparse_container()

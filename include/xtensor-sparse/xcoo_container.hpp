@@ -5,6 +5,10 @@
 
 namespace xt
 {
+    /******************************
+     * xcoo_container declaration *
+     ******************************/
+
     template <class D>
     class xcoo_container : public xsparse_container<D>
     {
@@ -57,6 +61,10 @@ namespace xt
 
         index_storage_type m_index;
     };
+
+    /*********************************
+     * xcoo_container implementation *
+     *********************************/
 
     template<class D>
     const typename xcoo_container<D>::value_type xcoo_container<D>::ZERO = 0;
@@ -139,6 +147,6 @@ namespace xt
         value_type v = (it)? *it: value_type();
         return reference(*this, std::move(key), v);
     }
-
 }
+
 #endif
