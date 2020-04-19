@@ -20,6 +20,7 @@ namespace xt
         using const_pointer = typename base_type::const_pointer;
         using shape_type = typename base_type::shape_type;
         using inner_shape_type = typename base_type::inner_shape_type;
+        using size_type = typename base_type::size_type;
 
         using true_pointer = value_type*;
 
@@ -34,7 +35,7 @@ namespace xt
 
         using strides_type = typename base_type::strides_type;
 
-        xcoo_container() noexcept;
+        xcoo_container() = default;
         ~xcoo_container() = default;
 
         xcoo_container(const xcoo_container&) = default;
@@ -44,11 +45,21 @@ namespace xt
         xcoo_container& operator=(xcoo_container&&) = default;
 
         void update_entries(const strides_type& old_strides);
+
+        template<class... Args>
+        const_reference access_impl(Args... args) const;
+        template<class... Args>
+        reference access_impl(Args... args);
+
     private:
 
-        index_storage_type m_index;
+        static const value_type ZERO;
 
+        index_storage_type m_index;
     };
+
+    template<class D>
+    const typename xcoo_container<D>::value_type xcoo_container<D>::ZERO = 0;
 
     template <class D>
     inline auto xcoo_container<D>::index_storage() const noexcept -> const index_storage_type&
@@ -65,23 +76,23 @@ namespace xt
     template <class D>
     inline void xcoo_container<D>::update_entries(const strides_type& old_strides)
     {
-        // storage_type new_data;
-        // for(auto& c: storage())
-        // {
-        //     auto& old_key = c.first;
-        //     size_type index = element_offset<size_type>(old_strides, old_key.cbegin(), old_key.cend());
-        //     shape_type new_key = unravel_from_strides(index, strides());
-        //     new_data[new_key] = c.second;
-        // }
+        index_storage_type new_index;
 
-        // std::swap(storage(), new_data);
+        for(auto& old_key: m_index)
+        {
+            size_type index = element_offset<size_type>(old_strides, old_key.cbegin(), old_key.cend());
+            shape_type new_key = unravel_from_strides(index, this->strides());
+            new_index.push_back(new_key);
+        }
+
+        std::swap(m_index, new_index);
     }
 
     template <class D>
     inline auto xcoo_container<D>::find_element(const index_type& index) -> true_pointer
     {
         auto it = std::find(m_index.begin(), m_index.end(), index);
-        return it == m_index.end() ? nullptr : &(this->storage().begin() + (it - m_index));
+        return it == m_index.end() ? nullptr : &*(this->storage().begin() + (it - m_index.begin()));
     }
 
     template <class D>
@@ -100,6 +111,33 @@ namespace xt
             m_index.erase(it);
             this->storage().erase(this->storage().begin() + (it - m_index.begin()));
         }
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xcoo_container<D>::access_impl(Args... args) const -> const_reference
+    {
+        // TODO: check if all args have the good type
+        index_type key{static_cast<size_type>(args)...};
+
+        auto it = find_element(key);
+        if (it)
+        {
+            return *it;
+        }
+        return ZERO;
+    }
+
+    template<class D>
+    template<class... Args>
+    inline auto xcoo_container<D>::access_impl(Args... args) -> reference
+    {
+        // TODO: check if all args have the good type
+        index_type key{static_cast<size_type>(args)...};
+
+        auto it = find_element(key);
+        value_type v = (it)? *it: value_type();
+        return reference(*this, std::move(key), v);
     }
 
 }

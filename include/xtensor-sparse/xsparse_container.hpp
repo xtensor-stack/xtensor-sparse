@@ -76,11 +76,10 @@ namespace xt
         const derived_type& derived_cast() const & noexcept;
         derived_type derived_cast() && noexcept;
 
+        const strides_type& strides() const noexcept;
+
     private:
 
-        static const value_type ZERO;
-
-        const strides_type& strides() const noexcept;
 
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::false_type);
@@ -96,9 +95,6 @@ namespace xt
     /*********************************
      * xsparse_container implementation *
      *********************************/
-
-    template<class D>
-    const typename xsparse_container<D>::value_type xsparse_container<D>::ZERO = 0;
 
     template<class D>
     xsparse_container<D>::xsparse_container()
