@@ -40,8 +40,9 @@ endif()
 # =====
 
 set(XTENSOR_SPARSE_HEADERS
-    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcoo_array.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcoo_container.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcoo_array.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcoo_tensor.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_tensor.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_array.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_container.hpp
