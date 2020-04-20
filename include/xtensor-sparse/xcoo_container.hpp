@@ -95,7 +95,7 @@ namespace xt
             shape_type new_key = unravel_from_strides(index, this->strides());
             new_index.push_back(new_key);
         }
-
+        using std::swap;
         swap(m_index, new_index);
     }
 
