@@ -31,9 +31,6 @@ namespace xt
         const index_storage_type& index_storage() const noexcept;
         index_storage_type& index_storage() noexcept;
 
-        true_pointer find_element(const index_type& index);
-        void insert_element(const index_type& index, const_reference value);
-        void remove_element(const index_type& index);
 
     protected:
 
@@ -60,6 +57,12 @@ namespace xt
         static const value_type ZERO;
 
         index_storage_type m_index;
+
+        true_pointer find_element(const index_type& index);
+        void insert_element(const index_type& index, const_reference value);
+        void remove_element(const index_type& index);
+
+        friend class xsparse_reference<xcoo_container<D>>;
     };
 
     /*********************************
@@ -93,7 +96,7 @@ namespace xt
             new_index.push_back(new_key);
         }
 
-        std::swap(m_index, new_index);
+        swap(m_index, new_index);
     }
 
     template <class D>
