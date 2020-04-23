@@ -9,7 +9,7 @@ Multi-dimensional sparse arrays based on [xtensor](https://github.com/xtensor-st
 
 ## Introduction
 
-** xtensor-sparse is in development **
+**xtensor-sparse is in development**
 
 ## Installation
 
