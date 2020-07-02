@@ -19,14 +19,14 @@ namespace xt
         EXPECT_EQ(scheme.coordinate()[1], index_type({2}));
     }
 
-    TEST(xcsf_scheme, insert_throw)
-    {
-        xcsf_scheme_type scheme;
-        scheme.insert_element({0, 2}, 2.5);
+    // TEST(xcsf_scheme, insert_throw)
+    // {
+    //     xcsf_scheme_type scheme;
+    //     scheme.insert_element({0, 2}, 2.5);
 
-        XT_EXPECT_THROW(scheme.insert_element({0}, 2.8), std::runtime_error);
-        XT_EXPECT_THROW(scheme.insert_element({1, 2, 6}, 4.2), std::runtime_error);
-    }
+    //     XT_EXPECT_THROW(scheme.insert_element({0}, 2.8), std::runtime_error);
+    //     XT_EXPECT_THROW(scheme.insert_element({1, 2, 6}, 4.2), std::runtime_error);
+    // }
 
     TEST(xcsf_scheme, find)
     {
