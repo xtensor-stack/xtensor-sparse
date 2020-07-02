@@ -156,7 +156,7 @@ namespace xt
                 {
                     auto it = std::find_if(coord[i].cbegin() + pos[i][ielem], coord[i].cbegin() + pos[i][ielem + 1], [&](auto e){return e >= index[i];});
 
-                    if (it == coord[i].cbegin() + pos[i][ielem + 1] or *it != index[i])
+                    if (it == coord[i].cbegin() + pos[i][ielem + 1] || *it != index[i])
                     {
                         for(std::size_t j=ielem + 1; j<pos[i].size(); ++j)
                         {
