@@ -10,25 +10,7 @@ namespace xt
     namespace detail
     {
         template<std::size_t N, class Pos, class Coord, class Func, class Index>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, N>, std::size_t, std::size_t, const Pos&, const Coord&, Index& index, Func&&){}
-
-        template<class Pos, class Coord, class Func, class Index>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
-        {
-            for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
-            {
-                index[i] = coord[i][p];
-                if (i+1 == pos.size() - 1)
-                {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
-                }
-                else
-                {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
-                }
-                
-            }
-        }
+        void for_each_sparse_impl(std::integral_constant<std::size_t, N>, std::size_t, std::size_t, const Pos&, const Coord&, Index& index, Func&&){};
 
         template<class Pos, class Coord, class Func, class Index>
         void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
@@ -37,6 +19,23 @@ namespace xt
             {
                 index[i] = coord[i][p];
                 f(index);
+            }
+        }
+
+        template<class Pos, class Coord, class Func, class Index>
+        void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
+        {
+            for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
+            {
+                index[i] = coord[i][p];
+                if (i == pos.size() - 2)
+                {
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
+                }
+                else
+                {
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
+                }
             }
         }
 
