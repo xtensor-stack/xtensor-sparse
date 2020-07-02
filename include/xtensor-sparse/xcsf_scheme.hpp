@@ -217,25 +217,12 @@ namespace xt
     template <class P, class C, class ST, class IT>
     inline void xcsf_scheme<P, C, ST, IT>::remove_element(const index_type& index)
     {
-        /*std::size_t ielem = 0;
-        for(std::size_t i=0; i<index.size(); ++i)
-        {
-            auto it = std::find(m_coord[i].cbegin() + m_pos[i][ielem], m_coord[i].cbegin() + m_pos[i][ielem + 1], index[i]);
-            if (it != m_coord[i].cbegin() + m_pos[i][ielem + 1])
-            {
-                if (i == index.size() - 1)
-                {
-                    std::ptrdiff_t dst = std::distance(m_coord[i].cbegin(), it);
-                    this->storage().erase(this->storage().begin() + dst);
-                }
-                else
-                {
-                    ielem = it - (m_coord[i].cbegin() + m_pos[i][ielem]);
-                }
-            }
-        }*/
         // TODO: implement the version with a real remove inside coord, pos and storage
-        (*find_element(index)) = value_type(0);
+        auto elem = find_element(index);
+        if (elem)
+        {
+            *elem = value_type(0);
+        }
     }
 
     template <class P, class C, class ST, class IT>
