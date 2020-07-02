@@ -231,10 +231,10 @@ namespace xt
     {
         coordinate_type new_coords;
         position_type new_pos;
-        
+
         detail::for_each(m_pos, m_coords, [&](auto index){
             std::size_t offset = element_offset<std::size_t>(old_strides, index.cbegin(), index.cend());
-            index_type new_index = unravel_from_strides(offset, this->strides());
+            index_type new_index = unravel_from_strides(offset, new_strides);
             detail::insert_index(new_pos, new_coords, new_index);
         });
 
