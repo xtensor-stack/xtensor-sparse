@@ -196,11 +196,14 @@ namespace xt
     template <class P, class C, class ST, class IT>
     inline void xcsf_scheme<P, C, ST, IT>::insert_element(const index_type& index, const_reference value)
     {
-        auto ielem = detail::insert_index(m_pos, m_coords, index);
-        if (ielem == std::numeric_limits<std::size_t>::max())
+        if (m_pos.size() != 0)
         {
-            throw std::runtime_error("This should not happen");
+            XTENSOR_ASSERT(m_pos.size() == index.size());
         }
+
+        auto ielem = detail::insert_index(m_pos, m_coords, index);
+        XTENSOR_ASSERT(ielem != std::numeric_limits<std::size_t>::max());
+
         if (ielem == this->storage().size())
         {
             m_storage.push_back(value);
