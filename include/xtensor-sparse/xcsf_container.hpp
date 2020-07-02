@@ -61,7 +61,7 @@ namespace xt
         static const value_type ZERO;
 
         position_type m_pos;
-        index_storage_type m_index;
+        index_storage_type m_coord;
 
         true_pointer find_element(const index_type& index);
         void insert_element(const index_type& index, const_reference value);
@@ -80,59 +80,59 @@ namespace xt
     template <class D>
     inline auto xcsf_container<D>::index_storage() const noexcept -> const index_storage_type&
     {
-        return m_index;
+        return m_coord;
     }
 
     template <class D>
     inline auto xcsf_container<D>::index_storage() noexcept -> index_storage_type&
     {
-        return m_index;
+        return m_coord;
     }
 
     namespace detail
     {
-        template<std::size_t N, class Pos, class Coord, class Func, class Indices>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, N>, std::size_t, std::size_t, const Pos&, const Coord&, Indices& indices, Func&&){}
+        template<std::size_t N, class Pos, class Coord, class Func, class Index>
+        void for_each_sparse_impl(std::integral_constant<std::size_t, N>, std::size_t, std::size_t, const Pos&, const Coord&, Index& index, Func&&){}
 
-        template<class Pos, class Coord, class Func, class Indices>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Indices& indices, Func&& f)
+        template<class Pos, class Coord, class Func, class Index>
+        void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
         {
             for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
             {
-                indices[i] = coord[i][p];
+                index[i] = coord[i][p];
                 if (i+1 == pos.size() - 1)
                 {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, indices, std::forward<Func>(f));
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
                 }
                 else
                 {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, indices, std::forward<Func>(f));
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
                 }
                 
             }
         }
 
-        template<class Pos, class Coord, class Func, class Indices>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Indices& indices, Func&& f)
+        template<class Pos, class Coord, class Func, class Index>
+        void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
         {
             for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
             {
-                indices[i] = coord[i][p];
-                f(indices);
+                index[i] = coord[i][p];
+                f(index);
             }
         }
 
         template<class Pos, class Coord, class Func>
         void for_each(const Pos& pos, const Coord& coord, Func&& f)
         {
-            std::vector<std::size_t> indices(pos.size());
+            std::vector<std::size_t> index(pos.size());
             if (pos.size() == 1)
             {
-                for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, 0, 0, pos, coord, indices, std::forward<Func>(f));
+                for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
             }
             else if (pos.size() > 1)
             {
-                for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, 0, 0, pos, coord, indices, std::forward<Func>(f));
+                for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
             }
         }
 
@@ -189,18 +189,18 @@ namespace xt
     template <class D>
     inline void xcsf_container<D>::update_entries(const strides_type& old_strides)
     {
-        index_storage_type new_index;
+        index_storage_type new_coord;
         position_type new_pos;
         
-        detail::for_each(m_pos, m_index, [&](auto indices){
-            size_type index = element_offset<size_type>(old_strides, indices.cbegin(), indices.cend());
-            shape_type new_indices = unravel_from_strides(index, this->strides());
-            detail::insert_index(new_pos, new_index, new_indices);
+        detail::for_each(m_pos, m_coord, [&](auto index){
+            size_type offset = element_offset<size_type>(old_strides, index.cbegin(), index.cend());
+            shape_type new_index = unravel_from_strides(offset, this->strides());
+            detail::insert_index(new_pos, new_coord, new_index);
         });
 
         using std::swap;
         swap(m_pos, new_pos);
-        swap(m_index, new_index);
+        swap(m_coord, new_coord);
     }
 
     template <class D>
@@ -214,17 +214,17 @@ namespace xt
         std::size_t ielem = 0;
         for(std::size_t i=0; i<index.size(); ++i)
         {
-            auto it = std::find(m_index[i].cbegin() + m_pos[i][ielem], m_index[i].cbegin() + m_pos[i][ielem + 1], index[i]);
-            if (it != m_index[i].cbegin() + m_pos[i][ielem + 1])
+            auto it = std::find(m_coord[i].cbegin() + m_pos[i][ielem], m_coord[i].cbegin() + m_pos[i][ielem + 1], index[i]);
+            if (it != m_coord[i].cbegin() + m_pos[i][ielem + 1])
             {
                 if (i == index.size() - 1)
                 {
-                    std::ptrdiff_t dst = std::distance(m_index[i].cbegin(), it);
+                    std::ptrdiff_t dst = std::distance(m_coord[i].cbegin(), it);
                     return &(*(this->storage().begin() + dst));
                 }
                 else
                 {
-                    ielem = it - (m_index[i].cbegin() + m_pos[i][ielem]);
+                    ielem = it - (m_coord[i].cbegin() + m_pos[i][ielem]);
                 }
             }
             else
@@ -238,7 +238,7 @@ namespace xt
     template <class D>
     inline void xcsf_container<D>::insert_element(const index_type& index, const_reference value)
     {
-        auto ielem = detail::insert_index(m_pos, m_index, index);
+        auto ielem = detail::insert_index(m_pos, m_coord, index);
         if (ielem == std::numeric_limits<std::size_t>::max())
         {
             throw std::runtime_error("This should not happen");
@@ -256,12 +256,25 @@ namespace xt
     template <class D>
     inline void xcsf_container<D>::remove_element(const index_type& index)
     {
-        // auto it = std::find(m_index.begin(), m_index.end(), index);
-        // if (it != m_index.end())
-        // {
-        //     m_index.erase(it);
-        //     this->storage().erase(this->storage().begin() + (it - m_index.begin()));
-        // }
+        /*std::size_t ielem = 0;
+        for(std::size_t i=0; i<index.size(); ++i)
+        {
+            auto it = std::find(m_coord[i].cbegin() + m_pos[i][ielem], m_coord[i].cbegin() + m_pos[i][ielem + 1], index[i]);
+            if (it != m_coord[i].cbegin() + m_pos[i][ielem + 1])
+            {
+                if (i == index.size() - 1)
+                {
+                    std::ptrdiff_t dst = std::distance(m_coord[i].cbegin(), it);
+                    this->storage().erase(this->storage().begin() + dst);
+                }
+                else
+                {
+                    ielem = it - (m_coord[i].cbegin() + m_pos[i][ielem]);
+                }
+            }
+        }*/
+        // TODO: implement the version with a real remove inside coord, pos and storage
+        (*find_element(index)) = value_type(0);
     }
 
     template<class D>
