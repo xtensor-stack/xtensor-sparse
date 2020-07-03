@@ -172,37 +172,37 @@ namespace xt
         EXPECT_EQ(it.value(), 2.5);
         --it;
 
-        // scheme.update_entries(strides_1d, strides_2d);
-        // it = scheme.end();
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({1, 3}));
-        // EXPECT_EQ(it.value(), 6.7);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({1, 0}));
-        // EXPECT_EQ(it.value(), 8.2);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({0, 1}));
-        // EXPECT_EQ(it.value(), 3.1);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({0, 0}));
-        // EXPECT_EQ(it.value(), 2.5);
-        // --it;
+        scheme.update_entries(strides_1d, strides_2d);
+        it = scheme.end();
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 3}));
+        EXPECT_EQ(it.value(), 6.7);
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 0}));
+        EXPECT_EQ(it.value(), 8.2);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        --it;
 
-        // scheme.update_entries(strides_2d, strides_3d);
-        // it = scheme.end();
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({1, 0, 2}));
-        // EXPECT_EQ(it.value(), 6.7);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({0, 1, 2}));
-        // EXPECT_EQ(it.value(), 8.2);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({0, 0, 1}));
-        // EXPECT_EQ(it.value(), 3.1);
-        // --it;
-        // EXPECT_EQ(it.index(), index_type({0, 0, 0}));
-        // EXPECT_EQ(it.value(), 2.5);
-        // --it;
+        scheme.update_entries(strides_2d, strides_3d);
+        it = scheme.end();
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 0, 2}));
+        EXPECT_EQ(it.value(), 6.7);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 1, 2}));
+        EXPECT_EQ(it.value(), 8.2);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        --it;
     }
 
 }

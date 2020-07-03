@@ -76,9 +76,7 @@ namespace xt
         using self_type = xcsf_scheme_iterator;
         using xcsf_scheme = Scheme;
         using index_type = typename Scheme::index_type;
-        using index_type_iterator = svector<std::conditional_t<is_const,
-                                                               typename index_type::const_iterator,
-                                                               typename index_type::iterator>>;
+        using index_type_iterator = svector<typename index_type::const_iterator>;
         using reference = std::conditional_t<is_const,
                                              typename Scheme::const_reference,
                                              typename Scheme::reference>;
@@ -176,7 +174,7 @@ namespace xt
                         }
                         coord[i].insert(it, index[i]);
 
-                        ielem = it - (coord[i].cbegin() + pos[i][ielem]);
+                        ielem = static_cast<std::size_t>(it - (coord[i].cbegin() + pos[i][ielem]));
 
                         for(std::size_t k=i+1; k<index.size(); ++k)
                         {
@@ -190,7 +188,7 @@ namespace xt
                         }
                         return ielem;
                     }
-                    ielem = it - (coord[i].cbegin() + pos[i][ielem]);
+                    ielem = static_cast<std::size_t>(it - (coord[i].cbegin() + pos[i][ielem]));
                 }
                 return std::numeric_limits<std::size_t>::max();
             }
@@ -237,7 +235,7 @@ namespace xt
                 }
                 else
                 {
-                    ielem = it - (m_coords[i].cbegin() + m_pos[i][ielem]);
+                    ielem = static_cast<std::size_t>(it - (m_coords[i].cbegin() + m_pos[i][ielem]));
                 }
             }
             else
@@ -307,8 +305,8 @@ namespace xt
         typename iterator::index_type_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
-            pos_index[d] = m_pos[d].begin();
-            coord_index[d] = m_coords[d].begin();
+            pos_index[d] = m_pos[d].cbegin();
+            coord_index[d] = m_coords[d].cbegin();
         }
         return xcsf_scheme_iterator<self_type, false>(*this,
                                                       std::move(pos_index),
@@ -323,8 +321,8 @@ namespace xt
         typename iterator::index_type_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
-            pos_index[d] = m_pos[d].end() - 1;
-            coord_index[d] = m_coords[d].end() - 1;
+            pos_index[d] = m_pos[d].cend() - 2;
+            coord_index[d] = m_coords[d].cend() - 1;
         }
         ++coord_index.back();
 
@@ -369,7 +367,7 @@ namespace xt
         typename const_iterator::index_type_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
-            pos_index[d] = m_pos[d].cend() - 1;
+            pos_index[d] = m_pos[d].cend() - 2;
             coord_index[d] = m_coords[d].cend() - 1;
         }
         ++coord_index.back();
@@ -394,9 +392,9 @@ namespace xt
         Scheme& scheme, 
         index_type_iterator&& pos_index,
         index_type_iterator&& coord_index)
-        : p_scheme(&scheme)
-        , m_pos_index(std::move(pos_index))
+        : m_pos_index(std::move(pos_index))
         , m_coord_index(std::move(coord_index))
+        , p_scheme(&scheme)
     {
         m_current_index.resize(m_pos_index.size());
         update_current_index();
@@ -405,8 +403,6 @@ namespace xt
     template <class Scheme, bool is_const>
     inline auto xcsf_scheme_iterator<Scheme, is_const>::operator++() -> self_type&
         {
-            using iterator_type = decltype(p_scheme->coordinate().back().begin());
-
             for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
             {
                 std::size_t d = i - 1;
@@ -416,7 +412,7 @@ namespace xt
                 }
                 ++m_coord_index[d];
 
-                auto dst = std::distance(p_scheme->coordinate()[d].begin(), static_cast<iterator_type>(m_coord_index[d]));
+                auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate()[d].begin(), m_coord_index[d]));
                 if (dst == *(m_pos_index[d] + 1))
                 {
                     ++m_pos_index[d];
@@ -432,8 +428,6 @@ namespace xt
     template <class Scheme, bool is_const>
     inline auto xcsf_scheme_iterator<Scheme, is_const>::operator--() -> self_type&
     {
-        using iterator_type = decltype(p_scheme->coordinate().back().begin());
-
         for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
         {
             std::size_t d = i - 1;
@@ -444,8 +438,7 @@ namespace xt
             }
             --m_coord_index[d];
 
-            auto dst = std::distance((p_scheme->coordinate()[d]).begin(), static_cast<iterator_type>(m_coord_index[d]));
-            std::cout << d << " " << dst << "\n";
+            auto dst = static_cast<std::size_t>(std::distance((p_scheme->coordinate()[d]).begin(), m_coord_index[d]));
             if (dst == *m_pos_index[d] - 1)
             {
                 --m_pos_index[d];
@@ -477,8 +470,7 @@ namespace xt
     template <class Scheme, bool is_const>
     inline auto xcsf_scheme_iterator<Scheme, is_const>::value() const -> reference
     {
-        using iterator_type = decltype(p_scheme->coordinate().back().begin());
-        std::ptrdiff_t dst = std::distance(p_scheme->coordinate().back().begin(), static_cast<iterator_type>(m_coord_index.back()));
+        std::ptrdiff_t dst = std::distance(p_scheme->coordinate().back().begin(), m_coord_index.back());
         return *(p_scheme->storage().begin() + dst);
     }
 
