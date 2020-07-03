@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_common_macros.hpp"
 
-#include <xtensor-sparse/xcsf_scheme.hpp>
+#include "xtensor-sparse/xcsf_scheme.hpp"
 
 namespace xt
 {
