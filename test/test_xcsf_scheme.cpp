@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "test_common_macros.hpp"
 
+#include <xtensor/xio.hpp>
+#include <xtensor/xadapt.hpp>
 #include "xtensor-sparse/xcsf_scheme.hpp"
 
 namespace xt
@@ -84,4 +86,41 @@ namespace xt
         EXPECT_EQ(scheme.position()[0], index_type({0, 4}));
         EXPECT_EQ(scheme.coordinate()[0], index_type({0, 1, 5, 8}));
     }
+
+    TEST(xcsf_scheme, iterator)
+    {
+        xcsf_scheme_type scheme;
+        scheme.insert_element({0}, 2.5);
+        scheme.insert_element({5}, 8.2);
+        scheme.insert_element({1}, 3.1);
+        scheme.insert_element({8}, 6.7);
+
+        svector<std::size_t> strides_1d{1};
+        svector<std::size_t> strides_2d{5, 1};
+        svector<std::size_t> strides_3d{6, 3, 1};
+
+        auto it = scheme.begin();
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+
+        scheme.update_entries(strides_1d, strides_2d);
+        it = scheme.begin();
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+        std::cout << xt::adapt(it.index()) << " " << it.value() << "\n";
+        ++it;
+
+    }
+
+
 }
