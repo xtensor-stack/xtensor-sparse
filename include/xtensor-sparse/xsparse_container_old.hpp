@@ -1,5 +1,5 @@
-#ifndef XSPARSE_XSPARSE_CONTAINER_HPP
-#define XSPARSE_XSPARSE_CONTAINER_HPP
+#ifndef XSPARSE_XSPARSE_CONTAINER_OLD_HPP
+#define XSPARSE_XSPARSE_CONTAINER_OLD_HPP
 
 #include <xtensor/xstrides.hpp>
 
@@ -7,12 +7,12 @@
 
 namespace xt
 {
-    /*********************************
-     * xsparse_container declaration *
-     *********************************/
+    /*************************************
+     * xsparse_container_old declaration *
+     *************************************/
 
     template <class D>
-    class xsparse_container
+    class xsparse_container_old
     {
     public:
 
@@ -61,14 +61,14 @@ namespace xt
 
         using strides_type = typename inner_types::strides_type;
 
-        xsparse_container();
-        ~xsparse_container() = default;
+        xsparse_container_old();
+        ~xsparse_container_old() = default;
 
-        xsparse_container(const xsparse_container&) = default;
-        xsparse_container& operator=(const xsparse_container&) = default;
+        xsparse_container_old(const xsparse_container_old&) = default;
+        xsparse_container_old& operator=(const xsparse_container_old&) = default;
 
-        xsparse_container(xsparse_container&&) = default;
-        xsparse_container& operator=(xsparse_container&&) = default;
+        xsparse_container_old(xsparse_container_old&&) = default;
+        xsparse_container_old& operator=(xsparse_container_old&&) = default;
 
         derived_type& derived_cast() & noexcept;
         const derived_type& derived_cast() const & noexcept;
@@ -87,47 +87,47 @@ namespace xt
         inner_shape_type m_shape;
         strides_type m_strides;
 
-        friend class xsparse_reference<xsparse_container<D>>;
+        friend class xsparse_reference<xsparse_container_old<D>>;
     };
 
-    /************************************
-     * xsparse_container implementation *
-     ************************************/
+    /****************************************
+     * xsparse_container_old implementation *
+     ****************************************/
 
     template<class D>
-    xsparse_container<D>::xsparse_container()
+    xsparse_container_old<D>::xsparse_container_old()
     {
         m_shape = xtl::make_sequence<inner_shape_type>(dimension(), 0);
         m_strides = xtl::make_sequence<strides_type>(dimension(), 0);
     }
 
     template <class D>
-    inline auto xsparse_container<D>::size() const noexcept -> size_type
+    inline auto xsparse_container_old<D>::size() const noexcept -> size_type
     {
         return compute_size(shape());
     }
 
     template <class D>
-    inline auto xsparse_container<D>::dimension() const noexcept -> size_type
+    inline auto xsparse_container_old<D>::dimension() const noexcept -> size_type
     {
         return shape().size();
     }
 
     template <class D>
-    inline auto xsparse_container<D>::shape() const noexcept -> const inner_shape_type&
+    inline auto xsparse_container_old<D>::shape() const noexcept -> const inner_shape_type&
     {
         return m_shape;
     }
 
     template <class D>
-    inline auto xsparse_container<D>::strides() const noexcept -> const strides_type&
+    inline auto xsparse_container_old<D>::strides() const noexcept -> const strides_type&
     {
         return m_strides;
     }
 
     template <class D>
     template <class S>
-    inline void xsparse_container<D>::resize(S&& shape, bool force)
+    inline void xsparse_container_old<D>::resize(S&& shape, bool force)
     {
         std::size_t dim = shape.size();
         if (m_shape.size() != dim || !std::equal(std::begin(shape), std::end(shape), std::begin(m_shape)) || force)
@@ -142,14 +142,14 @@ namespace xt
 
     template <class D>
     template <class S>
-    inline void xsparse_container<D>::resize(S&& shape)
+    inline void xsparse_container_old<D>::resize(S&& shape)
     {
         resize(std::forward<S>(shape), true);
     }
 
     template <class D>
     template <class S>
-    inline auto& xsparse_container<D>::reshape(S&& shape) &
+    inline auto& xsparse_container_old<D>::reshape(S&& shape) &
     {
         reshape_impl(std::forward<S>(shape), std::is_signed<std::decay_t<typename std::decay_t<S>::value_type>>());
         return *this;
@@ -157,7 +157,7 @@ namespace xt
 
     template <class D>
     template <class T>
-    inline auto& xsparse_container<D>::reshape(std::initializer_list<T> shape) &
+    inline auto& xsparse_container_old<D>::reshape(std::initializer_list<T> shape) &
     {
         using sh_type = rebind_container_t<D, shape_type>;
         sh_type sh = xtl::make_sequence<sh_type>(shape.size());
@@ -168,7 +168,7 @@ namespace xt
     
     template <class D>
     template <class S>
-    inline void xsparse_container<D>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
+    inline void xsparse_container_old<D>::reshape_impl(S&& shape, std::false_type /* is unsigned */)
     {
         if (compute_size(shape) != this->size())
         {
@@ -185,7 +185,7 @@ namespace xt
 
     template <class D>
     template <class S>
-    inline void xsparse_container<D>::reshape_impl(S&& _shape, std::true_type /* is signed */)
+    inline void xsparse_container_old<D>::reshape_impl(S&& _shape, std::true_type /* is signed */)
     {
         using value_type = typename std::decay_t<S>::value_type;
         auto new_size = compute_size(_shape);
@@ -225,20 +225,20 @@ namespace xt
     }
 
     template <class D>
-    inline auto xsparse_container<D>::storage() const noexcept -> const storage_type&
+    inline auto xsparse_container_old<D>::storage() const noexcept -> const storage_type&
     {
         return derived_cast().storage_impl();
     }
 
     template <class D>
-    inline auto xsparse_container<D>::storage() noexcept -> storage_type&
+    inline auto xsparse_container_old<D>::storage() noexcept -> storage_type&
     {
         return derived_cast().storage_impl();
     }
 
     template<class D>
     template<class... Args>
-    inline auto xsparse_container<D>::operator()(Args... args) const -> const_reference
+    inline auto xsparse_container_old<D>::operator()(Args... args) const -> const_reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -247,7 +247,7 @@ namespace xt
 
     template<class D>
     template<class... Args>
-    inline auto xsparse_container<D>::operator()(Args... args) -> reference
+    inline auto xsparse_container_old<D>::operator()(Args... args) -> reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
@@ -255,19 +255,19 @@ namespace xt
     }
 
     template <class D>
-    inline auto xsparse_container<D>::derived_cast() & noexcept -> derived_type&
+    inline auto xsparse_container_old<D>::derived_cast() & noexcept -> derived_type&
     {
         return *static_cast<derived_type*>(this);
     }
 
     template <class D>
-    inline auto xsparse_container<D>::derived_cast() const & noexcept -> const derived_type&
+    inline auto xsparse_container_old<D>::derived_cast() const & noexcept -> const derived_type&
     {
         return *static_cast<const derived_type*>(this);
     }
 
     template <class D>
-    inline auto xsparse_container<D>::derived_cast() && noexcept -> derived_type
+    inline auto xsparse_container_old<D>::derived_cast() && noexcept -> derived_type
     {
         return *static_cast<derived_type*>(this);
     }

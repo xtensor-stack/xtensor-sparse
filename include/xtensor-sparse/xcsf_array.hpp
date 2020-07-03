@@ -72,7 +72,7 @@ namespace xt
         storage_type& storage_impl() noexcept;
         const storage_type& storage_impl() const noexcept;
 
-        friend class xsparse_container<xcsf_array<T>>;
+        friend class xsparse_container_old<xcsf_array<T>>;
     };
 
     /*****************************

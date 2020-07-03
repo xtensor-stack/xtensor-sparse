@@ -46,7 +46,7 @@ set(XTENSOR_SPARSE_HEADERS
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_tensor.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_array.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_container.hpp
-    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_container.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_container_old.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_reference.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xtensor_sparse_config.hpp
 )

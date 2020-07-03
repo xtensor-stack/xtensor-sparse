@@ -1,7 +1,7 @@
 #ifndef XSPARSE_COO_CONTAINER_HPP
 #define XSPARSE_COO_CONTAINER_HPP
 
-#include "xsparse_container.hpp"
+#include "xsparse_container_old.hpp"
 
 namespace xt
 {
@@ -10,10 +10,10 @@ namespace xt
      ******************************/
 
     template <class D>
-    class xcoo_container : public xsparse_container<D>
+    class xcoo_container : public xsparse_container_old<D>
     {
     public:
-        using base_type = xsparse_container<D>;
+        using base_type = xsparse_container_old<D>;
         using index_storage_type = typename base_type::index_storage_type;
         using storage_type = typename base_type::storage_type;
         using index_type = typename base_type::index_type;
