@@ -84,4 +84,123 @@ namespace xt
         EXPECT_EQ(scheme.position()[0], index_type({0, 4}));
         EXPECT_EQ(scheme.coordinate()[0], index_type({0, 1, 5, 8}));
     }
+
+    TEST(xcsf_scheme, iterator_forward)
+    {
+        xcsf_scheme_type scheme;
+        scheme.insert_element({0}, 2.5);
+        scheme.insert_element({5}, 8.2);
+        scheme.insert_element({1}, 3.1);
+        scheme.insert_element({8}, 6.7);
+
+        svector<std::size_t> strides_1d{1};
+        svector<std::size_t> strides_2d{5, 1};
+        svector<std::size_t> strides_3d{6, 3, 1};
+
+        auto it = scheme.begin();
+        EXPECT_EQ(it.index(), index_type({0}));
+        EXPECT_EQ(it.value(), 2.5);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({1}));
+        EXPECT_EQ(it.value(), 3.1);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({5}));
+        EXPECT_EQ(it.value(), 8.2);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({8}));
+        EXPECT_EQ(it.value(), 6.7);
+        ++it;
+
+        scheme.update_entries(strides_1d, strides_2d);
+        it = scheme.begin();
+        EXPECT_EQ(it.index(), index_type({0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({1, 0}));
+        EXPECT_EQ(it.value(), 8.2);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({1, 3}));
+        EXPECT_EQ(it.value(), 6.7);
+        ++it;
+
+        scheme.update_entries(strides_2d, strides_3d);
+        it = scheme.begin();
+        EXPECT_EQ(it.index(), index_type({0, 0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({0, 0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({0, 1, 2}));
+        EXPECT_EQ(it.value(), 8.2);
+        ++it;
+        EXPECT_EQ(it.index(), index_type({1, 0, 2}));
+        EXPECT_EQ(it.value(), 6.7);
+        ++it;
+
+    }
+
+    TEST(xcsf_scheme, iterator_backward)
+    {
+        xcsf_scheme_type scheme;
+        scheme.insert_element({0}, 2.5);
+        scheme.insert_element({5}, 8.2);
+        scheme.insert_element({1}, 3.1);
+        scheme.insert_element({8}, 6.7);
+
+        svector<std::size_t> strides_1d{1};
+        svector<std::size_t> strides_2d{5, 1};
+        svector<std::size_t> strides_3d{6, 3, 1};
+
+        auto it = scheme.end();
+        --it;
+        EXPECT_EQ(it.index(), index_type({8}));
+        EXPECT_EQ(it.value(), 6.7);
+        --it;
+        EXPECT_EQ(it.index(), index_type({5}));
+        EXPECT_EQ(it.value(), 8.2);
+        --it;
+        EXPECT_EQ(it.index(), index_type({1}));
+        EXPECT_EQ(it.value(), 3.1);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0}));
+        EXPECT_EQ(it.value(), 2.5);
+        --it;
+
+        scheme.update_entries(strides_1d, strides_2d);
+        it = scheme.end();
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 3}));
+        EXPECT_EQ(it.value(), 6.7);
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 0}));
+        EXPECT_EQ(it.value(), 8.2);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        --it;
+
+        scheme.update_entries(strides_2d, strides_3d);
+        it = scheme.end();
+        --it;
+        EXPECT_EQ(it.index(), index_type({1, 0, 2}));
+        EXPECT_EQ(it.value(), 6.7);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 1, 2}));
+        EXPECT_EQ(it.value(), 8.2);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0, 1}));
+        EXPECT_EQ(it.value(), 3.1);
+        --it;
+        EXPECT_EQ(it.index(), index_type({0, 0, 0}));
+        EXPECT_EQ(it.value(), 2.5);
+        --it;
+    }
+
 }
