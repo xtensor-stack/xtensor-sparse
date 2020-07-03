@@ -71,7 +71,7 @@ namespace xt
         storage_type& storage_impl() noexcept;
         const storage_type& storage_impl() const noexcept;
 
-        friend class xsparse_container<xcoo_tensor<T, N>>;
+        friend class xsparse_container_old<xcoo_tensor<T, N>>;
     };
 
     /******************************

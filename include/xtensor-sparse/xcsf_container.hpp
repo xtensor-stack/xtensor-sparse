@@ -4,7 +4,7 @@
 #include <xtensor/xadapt.hpp>
 #include <xtensor/xio.hpp>
 
-#include "xsparse_container.hpp"
+#include "xsparse_container_old.hpp"
 
 namespace xt
 {
@@ -13,10 +13,10 @@ namespace xt
      ******************************/
 
     template <class D>
-    class xcsf_container : public xsparse_container<D>
+    class xcsf_container : public xsparse_container_old<D>
     {
     public:
-        using base_type = xsparse_container<D>;
+        using base_type = xsparse_container_old<D>;
         using index_storage_type = typename base_type::index_storage_type;
         using position_type = typename base_type::inner_types::position_type;
         using storage_type = typename base_type::storage_type;
