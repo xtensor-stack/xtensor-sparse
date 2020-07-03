@@ -9,9 +9,6 @@ namespace xt
 {
     namespace detail
     {
-        template<std::size_t N, class Pos, class Coord, class Func, class Index>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, N>, std::size_t, std::size_t, const Pos&, const Coord&, Index& index, Func&&){};
-
         template<class Pos, class Coord, class Func, class Index>
         void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
         {
