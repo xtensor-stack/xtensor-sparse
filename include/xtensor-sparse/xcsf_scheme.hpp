@@ -7,6 +7,96 @@
 
 namespace xt
 {
+    template <class Scheme, bool is_const>
+    class xcsf_scheme_iterator;
+
+    /***************************
+     * xcsf_scheme declaration *
+     ***************************/
+    template <class P, class C, class ST, class IT = svector<std::size_t>>
+    class xcsf_scheme
+    {
+    public:
+
+        using self_type = xcsf_scheme<P, C, ST, IT>;
+        using position_type = P;
+        using coordinate_type = C;
+        using storage_type = ST;
+        using index_type = IT;
+
+        using value_type = typename storage_type::value_type;
+        using reference = typename storage_type::reference;
+        using const_reference = typename storage_type::const_reference;
+        using pointer = typename storage_type::pointer;
+
+        using iterator = xcsf_scheme_iterator<self_type, false>;
+        using const_iterator = xcsf_scheme_iterator<self_type, true>;
+
+        const position_type& position() const;
+        const coordinate_type& coordinate() const;
+        const storage_type& storage() const;
+
+        pointer find_element(const index_type& index);
+        void insert_element(const index_type& index, const_reference value);
+        void remove_element(const index_type& index);
+
+        template<class strides_type>
+        void update_entries(const strides_type& old_strides,
+                            const strides_type& new_strides);
+
+        iterator begin();
+        iterator end();
+        const_iterator begin() const;
+        const_iterator end() const;
+        const_iterator cbegin() const;
+        const_iterator cend() const;
+
+    private:
+
+        position_type m_pos;
+        coordinate_type m_coords;
+        storage_type m_storage;
+    };
+
+    /************************************
+     * xcsf_scheme_iterator declaration *
+     ************************************/
+
+    template <class Scheme, bool is_const>
+    class xcsf_scheme_iterator
+    {
+    public:
+        using self_type = xcsf_scheme_iterator;
+        using xcsf_scheme = Scheme;
+        using index_type = typename Scheme::index_type;
+        using reference = std::conditional_t<is_const,
+                                             typename Scheme::const_reference,
+                                             typename Scheme::reference>;
+
+        xcsf_scheme_iterator(Scheme& scheme, index_type&& pos_index, index_type&& coord_index);
+
+        self_type& operator++();
+        self_type& operator--();
+
+        index_type& index() const;
+        reference value() const;
+        
+    private:
+
+        index_type& update_current_index() const;
+        std::size_t position(std::size_t d, std::size_t i) const;
+        std::size_t coordinate(std::size_t d, std::size_t i) const;
+
+        index_type m_pos_index;
+        index_type m_coord_index;
+        mutable index_type m_current_index;
+        xcsf_scheme* p_scheme;
+    };
+
+    /******************************
+     * xcsf_scheme implementation *
+     ******************************/
+
     namespace detail
     {
         template<class Pos, class Coord, class Func, class Index>
@@ -99,45 +189,6 @@ namespace xt
             return ielem;
         }
     }
-
-    /***************************
-     * xcsf_scheme declaration *
-     ***************************/
-    template <class P, class C, class ST, class IT = svector<std::size_t>>
-    class xcsf_scheme
-    {
-    public:
-
-        using position_type = P;
-        using coordinate_type = C;
-        using storage_type = ST;
-        using index_type = IT;
-
-        using value_type = typename storage_type::value_type;
-        using const_reference = typename storage_type::const_reference;
-        using pointer = typename storage_type::pointer;
-
-        const position_type& position() const;
-        const coordinate_type& coordinate() const;
-        const storage_type& storage() const;
-
-        pointer find_element(const index_type& index);
-        void insert_element(const index_type& index, const_reference value);
-        void remove_element(const index_type& index);
-
-        template<class strides_type>
-        void update_entries(const strides_type& old_strides,
-                            const strides_type& new_strides);
-    private:
-
-        position_type m_pos;
-        coordinate_type m_coords;
-        storage_type m_storage;
-    };
-
-    /******************************
-     * xcsf_scheme implementation *
-     ******************************/
 
     template <class P, class C, class ST, class IT>
     inline auto xcsf_scheme<P, C, ST, IT>::position() const -> const position_type&
@@ -238,6 +289,120 @@ namespace xt
         using std::swap;
         swap(m_pos, new_pos);
         swap(m_coords, new_coords);
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcsf_scheme<P, C, ST, IT>::begin() -> iterator
+    {
+        index_type pos_index;
+        index_type coord_index;
+        
+        return xcsf_scheme_iterator<self_type, false>(this, index_type(0), index_type(0));
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcsf_scheme<P, C, ST, IT>::begin() const -> const_iterator
+    {
+        return cbegin();
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcsf_scheme<P, C, ST, IT>::end() const -> const_iterator
+    {
+        return cend();
+    }
+    
+    /***************************************
+     * xcsf_scheme_iterator implementation *
+     ***************************************/
+
+    template <class Scheme, bool is_const>
+    inline xcsf_scheme_iterator<Scheme, is_const>::xcsf_scheme_iterator(Scheme& scheme, index_type&& pos_index, index_type&& coord_index)
+        : p_scheme(&scheme)
+        , m_pos_index(std::move(pos_index))
+        , m_coord_index(std::move(coord_index))
+    {
+        update_current_index();
+    }
+
+    template <class Scheme, bool is_const>
+    inline auto xcsf_scheme_iterator<Scheme, is_const>::operator++() -> self_type&
+        {
+            for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
+            {
+                std::size_t j = i - 1;
+                if (m_coord_index[j] == p_scheme.coordinate().size()-1)
+                {
+                    *this = p_scheme->end();
+                }
+                ++m_coord_index[j];
+                if (m_coord_index[j] == position(j, m_pos_index[j] + 1))
+                {
+                    ++m_pos_index[j];
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return *this;
+        }
+
+    template <class Scheme, bool is_const>
+    inline auto xcsf_scheme_iterator<Scheme, is_const>::operator--() -> self_type&
+    {
+        for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
+        {
+            std::size_t j = i - 1;
+            if (m_coord_index[j] == 0)
+            {
+                *this = p_scheme->rend();
+            }
+            --m_coord_index[j];
+            if (m_coord_index[j] == position(j, m_pos_index[j]) - 1)
+            {
+                --m_pos_index[j];
+            }
+            else
+            {
+                break;
+            }
+        }
+        return *this;
+    }
+
+    template <class Scheme, bool is_const>
+    inline auto xcsf_scheme_iterator<Scheme, is_const>::index() const -> index_type&
+    {
+        return update_current_index();
+    }
+
+    template <class Scheme, bool is_const>
+    inline auto xcsf_scheme_iterator<Scheme, is_const>::update_current_index() const -> index_type&
+    {
+        for(std::size_t d = 0; d < m_coord_index.size(); ++d)
+        {
+            m_current_index[d] = coordinate(d, m_coord_index[d]);
+        }
+        return m_current_index;
+    }
+
+    template <class Scheme, bool is_const>
+    inline auto xcsf_scheme_iterator<Scheme, is_const>::value() const -> reference
+    {
+        return p_scheme->storage()[m_coord_index.back()];
+    }
+
+    template <class Scheme, bool is_const>
+    inline std::size_t xcsf_scheme_iterator<Scheme, is_const>::position(std::size_t d, std::size_t i) const
+    {
+        return p_scheme->position()[d][i];
+    }
+
+    template <class Scheme, bool is_const>
+    inline std::size_t xcsf_scheme_iterator<Scheme, is_const>::coordinate(std::size_t d, std::size_t i) const
+    {
+        return p_scheme->coordinate()[d][i];
     }
 }
 #endif
