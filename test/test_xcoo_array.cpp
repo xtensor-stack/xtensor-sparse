@@ -1,10 +1,9 @@
 #include "gtest/gtest.h"
-#include <vector>
 #include <xtensor-sparse/xcoo_array.hpp>
 
 namespace xt
 {
-    /*TEST(xcoo_array, shaped_constructor)
+    TEST(xcoo_array, shaped_constructor)
     {
         std::vector<std::size_t> shape{2, 5};
         xt::xcoo_array<double> A(shape);
@@ -85,6 +84,6 @@ namespace xt
         EXPECT_EQ(A(0, 0), 3.);
         EXPECT_EQ(A(1, 2), 10.);
         EXPECT_EQ(A(1, 4), 0.);
-    }*/
+    }
 }
 
