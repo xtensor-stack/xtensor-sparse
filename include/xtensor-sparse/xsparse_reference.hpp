@@ -47,7 +47,7 @@ namespace xt
 
     private:
 
-        using pointer = typename container_type::true_pointer;
+        using pointer = typename container_type::pointer;
         void update_value(const_reference value);
 
         container_type& m_container;

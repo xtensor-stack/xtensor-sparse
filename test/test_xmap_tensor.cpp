@@ -4,7 +4,7 @@
 
 namespace xt
 {
-    TEST(xmap_tensor, shaped_constructor)
+    /*TEST(xmap_tensor, shaped_constructor)
     {
         xt::xmap_tensor<double, 2> A({2, 5});
 
@@ -79,6 +79,6 @@ namespace xt
         EXPECT_EQ(A(0, 0), 3.);
         EXPECT_EQ(A(1, 2), 10.);
         EXPECT_EQ(A(1, 4), 0.);
-    }
+    }*/
 }
 
