@@ -4,7 +4,7 @@
 
 namespace xt
 {
-    /*TEST(xmap_array, shaped_constructor)
+    TEST(xmap_array, shaped_constructor)
     {
         std::vector<std::size_t> shape{2, 5};
         xt::xmap_array<double> A(shape);
@@ -85,6 +85,6 @@ namespace xt
         EXPECT_EQ(A(0, 0), 3.);
         EXPECT_EQ(A(1, 2), 10.);
         EXPECT_EQ(A(1, 4), 0.);
-    }*/
+    }
 }
 
