@@ -2,6 +2,7 @@
 #define XSPARSE_MAP_ARRAY_HPP
 
 #include <map>
+#include <xtensor/xstorage.hpp>
 
 #include "xmap_scheme.hpp"
 #include "xsparse_container.hpp"
