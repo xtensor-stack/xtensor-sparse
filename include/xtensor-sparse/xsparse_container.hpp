@@ -254,7 +254,11 @@ namespace xt
         }
         else
         {
-            return make_index(size_type(0), args...);
+            std::array<Arg, argsize> tmp_index = {arg, args...};
+            index_type res = xtl::make_sequence<index_type>(dim);
+            std::fill(res.begin(), res.begin() + res.size() - argsize, size_type(0));
+            std::copy(tmp_index.cbegin(), tmp_index.cend(), res.begin() + res.size() - argsize);
+            return res;
         }
     }
 }
