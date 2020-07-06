@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include <vector>
 #include <xtensor-sparse/xcsf_array.hpp>
 
 namespace xt

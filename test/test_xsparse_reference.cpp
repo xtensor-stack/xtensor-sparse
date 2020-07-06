@@ -11,23 +11,20 @@ namespace xt
 
         using map_type = std::map<int, double>;
         using value_type = double;
+        using pointer = double*;
         using const_reference = const double&;
         using index_type = int;
 
         sparse_tester();
         const map_type& data() const;
 
-    private:
-
-        using true_pointer = double*;
-
-        true_pointer find_element(const index_type& index);
+        pointer find_element(const index_type& index);
         void insert_element(const index_type& index, const_reference v);
         void remove_element(const index_type& index);
 
-        map_type m_data;
+    private:
 
-        friend class xsparse_reference<sparse_tester>;
+        map_type m_data;
     };
 
     using sparse_ref = xsparse_reference<sparse_tester>;
@@ -42,7 +39,7 @@ namespace xt
         return m_data;
     }
 
-    auto sparse_tester::find_element(const index_type& index) -> true_pointer
+    auto sparse_tester::find_element(const index_type& index) -> pointer
     {
         auto it = m_data.find(index);
         return it != m_data.end() ? &(it->second) : nullptr;

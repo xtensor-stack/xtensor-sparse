@@ -21,13 +21,14 @@ namespace xt
         using inner_types = xcontainer_inner_types<D>;
         using scheme_type = typename inner_types::scheme_type;
         using index_type = typename inner_types::index_type;
+        using storage_type = typename inner_types::storage_type;
         using value_type = typename inner_types::value_type;
         using reference = typename inner_types::reference;
         using const_reference = typename inner_types::const_reference;
         using pointer = typename inner_types::pointer;
         using const_pointer = typename inner_types::const_pointer;
         using size_type = typename inner_types::size_type;
-        using difference_type = typename storage_type::difference_type;
+        using difference_type = typename inner_types::difference_type;
 
         using shape_type = typename inner_types::shape_type;
         using inner_shape_type = typename inner_types::inner_shape_type;
@@ -55,7 +56,7 @@ namespace xt
 
     protected:
 
-        xsparse_container();
+        xsparse_container() = default;
         ~xsparse_container() = default;
 
         xsparse_container(const xsparse_container&) = default;
@@ -71,6 +72,8 @@ namespace xt
         template <class S = shape_type>
         void reshape_impl(S&& shape, std::true_type);
 
+        index_type make_index() const;
+
         template <class Arg, class... Args>
         index_type make_index(Arg arg, Args... args) const;
 
@@ -84,14 +87,6 @@ namespace xt
     /************************************
      * xsparse_container implementation *
      ************************************/
-
-    template<class D>
-    inline xsparse_container<D>::xsparse_container()
-        : m_shape(xtl::make_sequence<inner_shape_type>(dimension(), 0))
-        , m_strides(xtl::make_sequence<strides_type>(dimension(), 0))
-        , m_scheme()
-    {
-    }
 
     template <class D>
     inline auto xsparse_container<D>::size() const noexcept -> size_type
@@ -119,10 +114,10 @@ namespace xt
         if (m_shape.size() != dim || !std::equal(std::begin(shape), std::end(shape), std::begin(m_shape)) || force)
         {
             m_shape = xtl::forward_sequence<shape_type, S>(shape);
-            strides_type old_strides = strides();
+            strides_type old_strides = m_strides;
             resize_container(m_strides, dim);
             compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-            m_scheme.update_entries(old_strides);
+            m_scheme.update_entries(old_strides, m_strides);
         }
     }
 
@@ -154,11 +149,11 @@ namespace xt
 
     template<class D>
     template<class... Args>
-    inline auto xsparse_container_old<D>::operator()(Args... args) const -> const_reference
+    inline auto xsparse_container<D>::operator()(Args... args) const -> const_reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
-        index_type index = make_index(args...);
+        index_type index = make_index(static_cast<size_type>(args)...);
         auto it = m_scheme.find_element(index);
         if (it)
         {
@@ -169,15 +164,14 @@ namespace xt
 
     template<class D>
     template<class... Args>
-    inline auto xsparse_container_old<D>::operator()(Args... args) -> reference
+    inline auto xsparse_container<D>::operator()(Args... args) -> reference
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
-        index_type index = make_index(args...);
+        index_type index = make_index(static_cast<size_type>(args)...);
         auto it = m_scheme.find_element(index);
-        auto it = find_element(key);
         value_type v = (it)? *it: value_type();
-        return reference(*this, std::move(key), v);
+        return reference(m_scheme, std::move(index), v);
     }
 
     template <class D>
@@ -190,11 +184,11 @@ namespace xt
         }
 
         std::size_t dim = shape.size();
-        strides_type old_strides = strides();
+        strides_type old_strides = m_strides;
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        m_scheme.update_entries(old_strides);
+        m_scheme.update_entries(old_strides, m_strides);
     }
 
     template <class D>
@@ -231,11 +225,17 @@ namespace xt
         }
         
         std::size_t dim = shape.size();
-        auto old_strides = strides();
+        auto old_strides = m_strides;
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        m_scheme.update_entries(old_strides);
+        m_scheme.update_entries(old_strides, m_strides);
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::make_index() const -> index_type
+    {
+        return index_type();
     }
 
     template <class D>
@@ -254,7 +254,11 @@ namespace xt
         }
         else
         {
-            return make_index(size_type(0), args...);
+            std::array<Arg, argsize> tmp_index = {arg, args...};
+            index_type res = xtl::make_sequence<index_type>(dim);
+            std::fill(res.begin(), res.begin() + res.size() - argsize, size_type(0));
+            std::copy(tmp_index.cbegin(), tmp_index.cend(), res.begin() + res.size() - argsize);
+            return res;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace xt
         using storage_type = ST;
         using index_type = IT;
 
+        using value_type = typename storage_type::value_type;
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
 

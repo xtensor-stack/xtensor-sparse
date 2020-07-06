@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include <vector>
 #include <xtensor-sparse/xcoo_tensor.hpp>
 
 namespace xt
@@ -27,9 +26,9 @@ namespace xt
     {
         xt::xcoo_tensor<double, 2> A({10, 1});
 
-        A(1) = 1.;
-        A(5) = 5.;
-        A(7) = 7.;
+        A(1, 0) = 1.;
+        A(5, 0) = 5.;
+        A(7, 0) = 7.;
 
         EXPECT_EQ(A.dimension(), size_t(2));
         EXPECT_EQ(A.shape()[0], size_t(10));
@@ -50,9 +49,9 @@ namespace xt
     {
         xt::xcoo_tensor<double, 2> A({20, 1});
 
-        A(1) = 1.;
-        A(5) = 5.;
-        A(7) = 7.;
+        A(1, 0) = 1.;
+        A(5, 0) = 5.;
+        A(7, 0) = 7.;
 
         EXPECT_EQ(A.dimension(), size_t(2));
         EXPECT_EQ(A.shape()[0], size_t(20));
