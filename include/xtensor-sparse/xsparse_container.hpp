@@ -117,7 +117,7 @@ namespace xt
             strides_type old_strides = m_strides;
             resize_container(m_strides, dim);
             compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-            m_scheme.update_entries(old_strides, m_strides);
+            m_scheme.update_entries(old_strides, m_strides, m_shape);
         }
     }
 
@@ -188,7 +188,7 @@ namespace xt
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        m_scheme.update_entries(old_strides, m_strides);
+        m_scheme.update_entries(old_strides, m_strides, m_shape);
     }
 
     template <class D>
@@ -229,7 +229,7 @@ namespace xt
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
         resize_container(m_strides, dim);
         compute_strides(m_shape, XTENSOR_DEFAULT_LAYOUT, m_strides);
-        m_scheme.update_entries(old_strides, m_strides);
+        m_scheme.update_entries(old_strides, m_strides, m_shape);
     }
 
     template <class D>

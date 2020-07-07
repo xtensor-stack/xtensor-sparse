@@ -44,9 +44,10 @@ namespace xt
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
-        template<class strides_type>
+        template <class strides_type, class shape_type>
         void update_entries(const strides_type& old_strides,
-                            const strides_type& new_strides);
+                            const strides_type& new_strides,
+                            const shape_type& new_shape);
 
         iterator begin();
         iterator end();
@@ -105,7 +106,7 @@ namespace xt
 
     namespace detail
     {
-        template<class Pos, class Coord, class Func, class Index>
+        template <class Pos, class Coord, class Func, class Index>
         void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
         {
             for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
@@ -115,7 +116,7 @@ namespace xt
             }
         }
 
-        template<class Pos, class Coord, class Func, class Index>
+        template <class Pos, class Coord, class Func, class Index>
         void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
         {
             for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
@@ -132,7 +133,7 @@ namespace xt
             }
         }
 
-        template<class Pos, class Coord, class Func>
+        template <class Pos, class Coord, class Func>
         void for_each(const Pos& pos, const Coord& coord, Func&& f)
         {
             std::vector<std::size_t> index(pos.size());
@@ -146,7 +147,7 @@ namespace xt
             }
         }
 
-        template<class Pos, class Coord, class Index>
+        template <class Pos, class Coord, class Index>
         std::size_t insert_index(Pos& pos, Coord& coord, const Index& index)
         {
             std::size_t ielem = 0;
@@ -279,9 +280,10 @@ namespace xt
     }
 
     template <class P, class C, class ST, class IT>
-    template<class strides_type>
+    template <class strides_type, class shape_type>
     inline void xcsf_scheme<P, C, ST, IT>::update_entries(const strides_type& old_strides,
-                                                          const strides_type& new_strides)
+                                                          const strides_type& new_strides,
+                                                          const shape_type&)
     {
         coordinate_type new_coords;
         position_type new_pos;
