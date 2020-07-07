@@ -404,28 +404,28 @@ namespace xt
 
     template <class Scheme, bool is_const>
     inline auto xcsf_scheme_iterator<Scheme, is_const>::operator++() -> self_type&
+    {
+        for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
         {
-            for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
+            std::size_t d = i - 1;
+            if (m_coord_index[d] == p_scheme->coordinate()[d].end())
             {
-                std::size_t d = i - 1;
-                if (m_coord_index[d] == p_scheme->coordinate()[d].end())
-                {
-                    break;
-                }
-                ++m_coord_index[d];
-
-                auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate()[d].begin(), m_coord_index[d]));
-                if (dst == *(m_pos_index[d] + 1))
-                {
-                    ++m_pos_index[d];
-                }
-                else
-                {
-                    break;
-                }
+                break;
             }
-            return *this;
+            ++m_coord_index[d];
+
+            auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate()[d].begin(), m_coord_index[d]));
+            if (dst == *(m_pos_index[d] + 1))
+            {
+                ++m_pos_index[d];
+            }
+            else
+            {
+                break;
+            }
         }
+        return *this;
+    }
 
     template <class Scheme, bool is_const>
     inline auto xcsf_scheme_iterator<Scheme, is_const>::operator--() -> self_type&
@@ -475,6 +475,6 @@ namespace xt
         std::ptrdiff_t dst = std::distance(p_scheme->coordinate().back().begin(), m_coord_index.back());
         return *(p_scheme->storage().begin() + dst);
     }
-
 }
+
 #endif
