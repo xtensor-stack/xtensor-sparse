@@ -385,6 +385,7 @@ namespace xt
         {
             ++m_pit;
         }
+        return *this;
     }
 
     template <class scheme>
@@ -396,6 +397,7 @@ namespace xt
         {
             --m_pit;
         }
+        return *this;
     }
 
     template <class scheme>
