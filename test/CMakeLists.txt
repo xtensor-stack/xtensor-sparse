@@ -141,6 +141,7 @@ set(XTENSOR_SPARSE_TESTS
     test_xcoo_tensor.cpp
     test_xcsf_array.cpp
     test_xcsf_scheme.cpp
+    test_xcsr_scheme.cpp
     test_xmap_array.cpp
     test_xmap_tensor.cpp
     test_xsparse_reference.cpp

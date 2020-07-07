@@ -58,8 +58,9 @@ namespace xt
         svector<std::size_t> strides_1d{1};
         svector<std::size_t> strides_2d{5, 1};
         svector<std::size_t> strides_3d{6, 3, 1};
+        svector<std::size_t> new_shape;
 
-        scheme.update_entries(strides_1d, strides_2d);
+        scheme.update_entries(strides_1d, strides_2d, new_shape);
         EXPECT_EQ(scheme.position().size(), 2);
         EXPECT_EQ(scheme.coordinate().size(), 2);
         EXPECT_EQ(scheme.position()[0], index_type({0, 2}));
@@ -67,7 +68,7 @@ namespace xt
         EXPECT_EQ(scheme.position()[1], index_type({0, 2, 4}));
         EXPECT_EQ(scheme.coordinate()[1], index_type({0, 1, 0, 3}));
 
-        scheme.update_entries(strides_2d, strides_3d);
+        scheme.update_entries(strides_2d, strides_3d, new_shape);
         EXPECT_EQ(scheme.position().size(), 3);
         EXPECT_EQ(scheme.coordinate().size(), 3);
         EXPECT_EQ(scheme.position()[0], index_type({0, 2}));
@@ -77,7 +78,7 @@ namespace xt
         EXPECT_EQ(scheme.position()[2], index_type({0, 2, 3, 4}));
         EXPECT_EQ(scheme.coordinate()[2], index_type({0, 1, 2, 2}));
 
-        scheme.update_entries(strides_3d, strides_1d);
+        scheme.update_entries(strides_3d, strides_1d, new_shape);
         EXPECT_EQ(scheme.position().size(), 1);
         EXPECT_EQ(scheme.coordinate().size(), 1);
         EXPECT_EQ(scheme.position()[0], index_type({0, 4}));
@@ -95,6 +96,7 @@ namespace xt
         svector<std::size_t> strides_1d{1};
         svector<std::size_t> strides_2d{5, 1};
         svector<std::size_t> strides_3d{6, 3, 1};
+        svector<std::size_t> new_shape;
 
         auto it = scheme.begin();
         EXPECT_EQ(it.index(), index_type({0}));
@@ -110,7 +112,7 @@ namespace xt
         EXPECT_EQ(it.value(), 6.7);
         ++it;
 
-        scheme.update_entries(strides_1d, strides_2d);
+        scheme.update_entries(strides_1d, strides_2d, new_shape);
         it = scheme.begin();
         EXPECT_EQ(it.index(), index_type({0, 0}));
         EXPECT_EQ(it.value(), 2.5);
@@ -125,7 +127,7 @@ namespace xt
         EXPECT_EQ(it.value(), 6.7);
         ++it;
 
-        scheme.update_entries(strides_2d, strides_3d);
+        scheme.update_entries(strides_2d, strides_3d, new_shape);
         it = scheme.begin();
         EXPECT_EQ(it.index(), index_type({0, 0, 0}));
         EXPECT_EQ(it.value(), 2.5);
@@ -153,6 +155,7 @@ namespace xt
         svector<std::size_t> strides_1d{1};
         svector<std::size_t> strides_2d{5, 1};
         svector<std::size_t> strides_3d{6, 3, 1};
+        svector<std::size_t> new_shape;
 
         auto it = scheme.end();
         --it;
@@ -169,7 +172,7 @@ namespace xt
         EXPECT_EQ(it.value(), 2.5);
         --it;
 
-        scheme.update_entries(strides_1d, strides_2d);
+        scheme.update_entries(strides_1d, strides_2d, new_shape);
         it = scheme.end();
         --it;
         EXPECT_EQ(it.index(), index_type({1, 3}));
@@ -185,7 +188,7 @@ namespace xt
         EXPECT_EQ(it.value(), 2.5);
         --it;
 
-        scheme.update_entries(strides_2d, strides_3d);
+        scheme.update_entries(strides_2d, strides_3d, new_shape);
         it = scheme.end();
         --it;
         EXPECT_EQ(it.index(), index_type({1, 0, 2}));

@@ -44,9 +44,10 @@ namespace xt
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
-        template<class strides_type>
+        template<class strides_type, class shape_type>
         void update_entries(const strides_type& old_strides,
-                            const strides_type& new_strides);
+                            const strides_type& new_strides,
+                            const shape_type& new_shape);
 
         iterator begin();
         iterator end();
@@ -279,9 +280,10 @@ namespace xt
     }
 
     template <class P, class C, class ST, class IT>
-    template<class strides_type>
+    template<class strides_type, class shape_type>
     inline void xcsf_scheme<P, C, ST, IT>::update_entries(const strides_type& old_strides,
-                                                          const strides_type& new_strides)
+                                                          const strides_type& new_strides,
+                                                          const shape_type&)
     {
         coordinate_type new_coords;
         position_type new_pos;

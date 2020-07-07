@@ -74,7 +74,8 @@ namespace xt
         auto scheme = make_coo_scheme();
         std::vector<size_t> old_strides = {8, 1};
         std::vector<size_t> new_strides = {8, 4, 1};
-        scheme.update_entries(old_strides, new_strides);
+        std::vector<size_t> new_shape;
+        scheme.update_entries(old_strides, new_strides, new_shape);
 
         EXPECT_EQ(scheme.coordinate()[0], index_type({0, 0, 2}));
         EXPECT_EQ(scheme.coordinate()[1], index_type({0, 1, 0}));
