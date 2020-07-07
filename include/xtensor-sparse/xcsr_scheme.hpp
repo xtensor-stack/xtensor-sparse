@@ -32,7 +32,6 @@ namespace xt
         using value_type = typename storage_type::value_type;
         using reference = typename storage_type::reference;
         using const_reference = typename storage_type::const_reference;
-        using difference_type = typename storage_type::difference_type;
         using pointer = typename storage_type::pointer;
 
         using iterator = xcsr_scheme_iterator<self_type>;
@@ -111,10 +110,7 @@ namespace xt
 
     template <class scheme>
     class xcsr_scheme_iterator: public xtl::xrandom_access_iterator_base<xcsr_scheme_iterator<scheme>,
-                                                                         typename scheme::value_type,
-                                                                         typename scheme::difference_type,
-                                                                         typename scheme::pointer,
-                                                                         typename scheme::reference>
+                                                                         detail::xcsr_scheme_iterator_types<scheme>>
     {
     public:
         using self_type = xcsr_scheme_iterator;
