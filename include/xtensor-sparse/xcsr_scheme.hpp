@@ -50,7 +50,7 @@ namespace xt
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
-        template<class strides_type, class shape_type>
+        template <class strides_type, class shape_type>
         void update_entries(const strides_type& old_strides,
                             const strides_type& new_strides,
                             const shape_type& new_shape);
@@ -174,7 +174,7 @@ namespace xt
     {
         namespace csr
         {
-            template<class Pos, class Coord, class Index>
+            template <class Pos, class Coord, class Index>
             std::size_t insert_index(Pos& pos, Coord& coord, const Index& index)
             {        
                 std::size_t ielem = index[0];
@@ -268,7 +268,7 @@ namespace xt
     }
 
     template <class P, class C, class ST>
-    template<class strides_type, class shape_type>
+    template <class strides_type, class shape_type>
     inline void xcsr_scheme<P, C, ST>::update_entries(const strides_type& old_strides,
                                                       const strides_type& new_strides,
                                                       const shape_type& new_shape)

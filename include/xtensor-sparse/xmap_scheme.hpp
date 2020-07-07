@@ -26,7 +26,7 @@ namespace xt
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
-        template<class strides_type, class shape_type>
+        template <class strides_type, class shape_type>
         void update_entries(const strides_type& old_strides,
                             const strides_type& new_strides,
                             const shape_type& new_shape);
@@ -66,7 +66,7 @@ namespace xt
     }
 
     template <class ST>
-    template<class strides_type, class shape_type>
+    template <class strides_type, class shape_type>
     inline void xmap_scheme<ST>::update_entries(const strides_type& old_strides,
                                                 const strides_type& new_strides,
                                                 const shape_type&)
