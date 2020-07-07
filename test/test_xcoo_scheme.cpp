@@ -81,5 +81,64 @@ namespace xt
         EXPECT_EQ(scheme.coordinate()[2], index_type({1, 0, 1}));
         EXPECT_EQ(scheme.coordinate()[3], index_type({2, 1, 3}));
     }
+
+    template <class S>
+    class coo_scheme_iterator : public ::testing::Test
+    {
+    public:
+
+        using schmee_type = S;
+    };
+
+    using coo_iterator_test_types = ::testing::Types<xcoo_scheme_type, const xcoo_scheme_type>;
+    TYPED_TEST_SUITE(coo_scheme_iterator, coo_iterator_test_types);
+
+    TYPED_TEST(coo_scheme_iterator, increment)
+    {
+        TypeParam scheme = make_coo_scheme();
+        auto it = scheme.begin();
+        EXPECT_EQ(*it, 2.5);
+        EXPECT_EQ(it.index(), index_type({0, 2}));
+        ++it;
+        EXPECT_EQ(*it, 1.7);
+        EXPECT_EQ(it.index(), index_type({0, 4}));
+        ++it;
+        EXPECT_EQ(*it, 3.0);
+        EXPECT_EQ(it.index(), index_type({1, 1}));
+        ++it;
+        EXPECT_EQ(*it, 5.4);
+        EXPECT_EQ(it.index(), index_type({2, 7}));
+        ++it;
+        EXPECT_EQ(it, scheme.end());
+
+        auto it2 = scheme.begin();
+        it2 += 2;
+        EXPECT_EQ(*it2, 3.0);
+        EXPECT_EQ(it2.index(), index_type({1, 1}));
+    }
+
+    TYPED_TEST(coo_scheme_iterator, decrement)
+    {
+        TypeParam scheme = make_coo_scheme();
+        auto it = scheme.end();
+        --it;
+        EXPECT_EQ(*it, 5.4);
+        EXPECT_EQ(it.index(), index_type({2, 7}));
+        --it;
+        EXPECT_EQ(*it, 3.0);
+        EXPECT_EQ(it.index(), index_type({1, 1}));
+        --it;
+        EXPECT_EQ(*it, 1.7);
+        EXPECT_EQ(it.index(), index_type({0, 4}));
+        --it;
+        EXPECT_EQ(*it, 2.5);
+        EXPECT_EQ(it.index(), index_type({0, 2}));
+        EXPECT_EQ(it, scheme.begin());
+
+        auto it2 = scheme.end();
+        it2 -= 2;
+        EXPECT_EQ(*it2, 3.0);
+        EXPECT_EQ(it2.index(), index_type({1, 1}));
+    }
 }
 
