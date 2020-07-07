@@ -101,7 +101,8 @@ namespace xt
     }
 
     template <class scheme>
-    class xcoo_scheme_iterator
+    class xcoo_scheme_iterator : xtl::xrandom_access_iterator_base3<xcoo_scheme_iterator<scheme>,
+                                                                    detail::xcoo_scheme_iterator_types<scheme>>
     {
     public:
 

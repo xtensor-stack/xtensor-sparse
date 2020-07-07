@@ -109,8 +109,8 @@ namespace xt
     }
 
     template <class scheme>
-    class xcsr_scheme_iterator: public xtl::xrandom_access_iterator_base<xcsr_scheme_iterator<scheme>,
-                                                                         detail::xcsr_scheme_iterator_types<scheme>>
+    class xcsr_scheme_iterator: public xtl::xrandom_access_iterator_base3<xcsr_scheme_iterator<scheme>,
+                                                                          detail::xcsr_scheme_iterator_types<scheme>>
     {
     public:
         using self_type = xcsr_scheme_iterator;
