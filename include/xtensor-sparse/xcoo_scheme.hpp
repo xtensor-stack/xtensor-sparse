@@ -29,6 +29,7 @@ namespace xt
         using value_type = typename storage_type::value_type;
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
+        using const_pointer = typename storage_type::const_pointer;
 
         const position_type& position() const;
         const coordinate_type& coordinate() const;
@@ -40,6 +41,7 @@ namespace xt
         xcoo_scheme();
 
         pointer find_element(const index_type& index);
+        const_pointer find_element(const index_type& index) const;
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
@@ -180,8 +182,16 @@ namespace xt
         return m_storage;
     }
 
+
     template <class P, class C, class ST, class IT>
     inline auto xcoo_scheme<P, C, ST, IT>::find_element(const index_type& index) -> pointer
+    {
+        auto it = std::find(m_coords.begin(), m_coords.end(), index);
+        return it == m_coords.end() ? nullptr : &*(m_storage.begin() + (it - m_coords.begin()));
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcoo_scheme<P, C, ST, IT>::find_element(const index_type& index) const -> const_pointer
     {
         auto it = std::find(m_coords.begin(), m_coords.end(), index);
         return it == m_coords.end() ? nullptr : &*(m_storage.begin() + (it - m_coords.begin()));

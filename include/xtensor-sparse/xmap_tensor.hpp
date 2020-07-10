@@ -5,6 +5,8 @@
 #include <map>
 
 #include <xtensor/xiterator.hpp>
+#include <xtensor/xmath.hpp>
+#include <xtensor/xsemantic.hpp>
 
 #include "xmap_scheme.hpp"
 #include "xsparse_container.hpp"
@@ -38,6 +40,7 @@ namespace xt
         using scheme_type = xmap_scheme<storage_type>;
 
         using reference = xsparse_reference<scheme_type>;
+        using temporary_type = xmap_tensor<T, N>;
     };
 
     template <class T, std::size_t N>
@@ -50,7 +53,8 @@ namespace xt
     };
 
     template<class T, std::size_t N>
-    class xmap_tensor : public xsparse_container<xmap_tensor<T, N>> 
+    class xmap_tensor : public xsparse_container<xmap_tensor<T, N>>,
+                        public xcontainer_semantic<xmap_tensor<T, N>>
     {
     public:
 
@@ -64,6 +68,7 @@ namespace xt
         using pointer = typename base_type::pointer;
         using const_pointer = typename base_type::const_pointer;
         using shape_type = typename base_type::shape_type;
+        using temporary_type = typename base_type::temporary_type;
         using inner_shape_type = typename base_type::inner_shape_type;
 
         xmap_tensor();

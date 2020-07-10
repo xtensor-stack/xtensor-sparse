@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <xtensor/xiterator.hpp>
+#include <xtensor/xmath.hpp>
+#include <xtensor/xsemantic.hpp>
 #include <xtensor/xstorage.hpp>
 
 #include "xcsf_scheme.hpp"
@@ -39,6 +41,7 @@ namespace xt
                                         index_type>;
 
         using reference = xsparse_reference<scheme_type>;
+        using temporary_type = xcsf_array<T>;
     };
     
     template <class T>
@@ -51,7 +54,8 @@ namespace xt
     };
 
     template <class T>
-    class xcsf_array : public xsparse_container<xcsf_array<T>> 
+    class xcsf_array : public xsparse_container<xcsf_array<T>>,
+                       public xcontainer_semantic<xcsf_array<T>>
     {
     public:
 
@@ -65,6 +69,7 @@ namespace xt
         using pointer = typename base_type::pointer;
         using const_pointer = typename base_type::const_pointer;
         using shape_type = typename base_type::shape_type;
+        using temporary_type = typename base_type::temporary_type;
         using inner_shape_type = typename base_type::inner_shape_type;
 
         xcsf_array();
