@@ -1,6 +1,8 @@
 #ifndef XSPARSE_SPARSE_REFERENCE_HPP
 #define XSPARSE_SPARSE_REFERENCE_HPP
 
+#include <type_traits>
+
 namespace xt
 {
 
@@ -54,7 +56,25 @@ namespace xt
         index_type m_index;
         value_type m_value;
     };
+}
 
+namespace std
+{
+    template <class C>
+    struct is_signed<xt::xsparse_reference<C>>
+        : is_signed<typename xt::xsparse_reference<C>::value_type>
+    {
+    };
+
+    template <class C>
+    struct is_arithmetic<xt::xsparse_reference<C>>
+        : is_arithmetic<typename xt::xsparse_reference<C>::value_type>
+    {
+    };
+}
+
+namespace xt
+{
     /************************************
      * xsparse_reference implementation *
      ************************************/

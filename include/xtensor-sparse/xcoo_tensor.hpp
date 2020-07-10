@@ -2,6 +2,8 @@
 #define XSPARSE_COO_TENSOR_HPP
 
 #include <xtensor/xiterator.hpp>
+#include <xtensor/xmath.hpp>
+#include <xtensor/xsemantic.hpp>
 
 #include "xcoo_scheme.hpp"
 #include "xsparse_container.hpp"
@@ -36,6 +38,7 @@ namespace xt
                                         storage_type,
                                         index_type>;
         using reference = xsparse_reference<scheme_type>;
+        using temporary_type = xcoo_tensor<T, N>;
     };
     
     template <class T, std::size_t N>
@@ -48,7 +51,8 @@ namespace xt
     };
 
     template <class T, std::size_t N>
-    class xcoo_tensor : public xsparse_container<xcoo_tensor<T, N>> 
+    class xcoo_tensor : public xsparse_container<xcoo_tensor<T, N>>,
+                        public xcontainer_semantic<xcoo_tensor<T, N>>
     {
     public:
 
@@ -62,6 +66,7 @@ namespace xt
         using pointer = typename base_type::pointer;
         using const_pointer = typename base_type::const_pointer;
         using shape_type = typename base_type::shape_type;
+        using temporary_type = typename base_type::temporary_type;
         using inner_shape_type = typename base_type::inner_shape_type;
 
         xcoo_tensor();

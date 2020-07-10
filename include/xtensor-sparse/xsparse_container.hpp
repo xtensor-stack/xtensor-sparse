@@ -32,6 +32,8 @@ namespace xt
         using const_pointer = typename inner_types::const_pointer;
         using size_type = typename inner_types::size_type;
         using difference_type = typename inner_types::difference_type;
+        using bool_load_type = xt::bool_load_type<value_type>;
+        using temporary_type = typename inner_types::temporary_type;
 
         using shape_type = typename inner_types::shape_type;
         using inner_shape_type = typename inner_types::inner_shape_type;
@@ -41,6 +43,9 @@ namespace xt
         using iterable_base = xiterable<D>;
         using stepper = typename iterable_base::stepper;
         using const_stepper = typename iterable_base::const_stepper;
+
+        static constexpr layout_type static_layout = layout_type::row_major;
+        static constexpr bool contiguous_layout = false;
 
         size_type size() const noexcept;
         size_type dimension() const noexcept;
@@ -74,6 +79,9 @@ namespace xt
         const_reference element(It first, It last) const;
 
         template <class S>
+        bool broadcast_shape(S& shape, bool reuse_cache = false) const;
+
+        template <class S>
         stepper stepper_begin(const S& shape) noexcept;
         template <class S>
         stepper stepper_end(const S& shape, layout_type l) noexcept;
@@ -82,6 +90,9 @@ namespace xt
         const_stepper stepper_begin(const S& shape) const noexcept;
         template <class S>
         const_stepper stepper_end(const S& shape, layout_type l) const noexcept;
+
+        inline layout_type layout() const noexcept;
+        inline bool is_contiguous() const noexcept;
 
     protected:
 
@@ -129,6 +140,10 @@ namespace xt
     /************************************
      * xsparse_container implementation *
      ************************************/
+
+    template <class D>
+    const typename xsparse_container<D>::value_type
+    xsparse_container<D>::ZERO = 0;
 
     template <class D>
     inline auto xsparse_container<D>::size() const noexcept -> size_type
@@ -226,6 +241,13 @@ namespace xt
 
     template <class D>
     template <class S>
+    inline bool xsparse_container<D>::broadcast_shape(S& shape, bool) const
+    {
+        return xt::broadcast_shape(this->shape(), shape);
+    }
+
+    template <class D>
+    template <class S>
     inline auto xsparse_container<D>::stepper_begin(const S& shape) noexcept -> stepper
     {
         size_type offset = shape.size() - this->dimension();
@@ -254,6 +276,18 @@ namespace xt
     {
         size_type offset = shape.size() - this->dimension();
         return const_stepper(&(this->derived_cast()), offset, true);
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::layout() const noexcept -> layout_type
+    {
+        return static_layout;
+    }
+
+    template <class D>
+    inline bool xsparse_container<D>::is_contiguous() const noexcept
+    {
+        return false;
     }
 
     template <class D>
