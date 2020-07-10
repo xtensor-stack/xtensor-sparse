@@ -1,6 +1,7 @@
 #ifndef XSPARSE_XSPARSE_CONTAINER_HPP
 #define XSPARSE_XSPARSE_CONTAINER_HPP
 
+#include <xtensor/xaccessible.hpp>
 #include <xtensor/xstrides.hpp>
 
 #include "xsparse_reference.hpp"
@@ -12,7 +13,7 @@ namespace xt
      *********************/
 
     template <class D>
-    class xsparse_container
+    class xsparse_container: private xaccessible<D>
     {
     public:
 
@@ -34,6 +35,8 @@ namespace xt
         using inner_shape_type = typename inner_types::inner_shape_type;
         using strides_type = typename inner_types::strides_type;
 
+        using accessible_base = xaccessible<D>;
+
         size_type size() const noexcept;
         size_type dimension() const noexcept;
         const inner_shape_type& shape() const noexcept;
@@ -53,6 +56,17 @@ namespace xt
 
         template <class... Args>
         const_reference operator()(Args... args) const;
+
+        using accessible_base::shape;
+        using accessible_base::at;
+        using accessible_base::operator[];
+        using accessible_base::periodic;
+        using accessible_base::in_bounds;
+
+        template <class It>
+        reference element(It first, It last);
+        template <class It>
+        const_reference element(It first, It last) const;
 
     protected:
 
@@ -77,11 +91,20 @@ namespace xt
         template <class Arg, class... Args>
         index_type make_index(Arg arg, Args... args) const;
 
+        template <class It>
+        index_type make_index_from_it(It first, It last) const;
+
+        const_reference access_impl(index_type index) const;
+        reference access_impl(index_type index);
+
         static const value_type ZERO;
 
         inner_shape_type m_shape;
         strides_type m_strides;
         scheme_type m_scheme;
+
+        friend class xconst_accessible<D>;
+        friend class xaccessible<D>;
     };
 
     /************************************
@@ -153,13 +176,7 @@ namespace xt
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
-        index_type index = make_index(static_cast<size_type>(args)...);
-        auto it = m_scheme.find_element(index);
-        if (it)
-        {
-            return *it;
-        }
-        return ZERO;
+        return access_impl(make_index(static_cast<size_type>(args)...));
     }
 
     template<class D>
@@ -168,10 +185,24 @@ namespace xt
     {
         XTENSOR_TRY(check_index(shape(), args...));
         XTENSOR_CHECK_DIMENSION(shape(), args...);
-        index_type index = make_index(static_cast<size_type>(args)...);
-        auto it = m_scheme.find_element(index);
-        value_type v = (it)? *it: value_type();
-        return reference(m_scheme, std::move(index), v);
+        return access_impl(make_index(static_cast<size_type>(args)...));
+    }
+
+
+    template <class D>
+    template <class It>
+    inline auto xsparse_container<D>::element(It first, It last) -> reference
+    {
+        XTENSOR_TRY(check_element_index(shape(), first, last));
+        return access_impl(make_index_from_it(first, last));
+    }
+
+    template <class D>
+    template <class It>
+    inline auto xsparse_container<D>::element(It first, It last) const -> const_reference
+    {
+        XTENSOR_TRY(check_element_index(shape(), first, last));
+        return access_impl(make_index_from_it(first, last));
     }
 
     template <class D>
@@ -261,6 +292,35 @@ namespace xt
             return res;
         }
     }
+
+    template <class D>
+    template <class It>
+    inline auto xsparse_container<D>::make_index_from_it(It first, It last) const -> index_type
+    {
+        auto index = xtl::make_sequence<index_type>(static_cast<std::size_t>(std::distance(first, last)));
+        std::copy(first, last, index.begin());
+        return index;
+    }
+
+    template<class D>
+    inline auto xsparse_container<D>::access_impl(index_type index) const -> const_reference
+    {
+        auto it = m_scheme.find_element(index);
+        if (it)
+        {
+            return *it;
+        }
+        return ZERO;
+    }
+
+    template<class D>
+    inline auto xsparse_container<D>::access_impl(index_type index)-> reference
+    {
+        auto it = m_scheme.find_element(index);
+        value_type v = (it)? *it: value_type();
+        return reference(m_scheme, std::move(index), v);
+    }
+
 }
 
 #endif
