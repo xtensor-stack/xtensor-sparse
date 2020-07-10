@@ -61,6 +61,7 @@ namespace xt
 
         using self_type = xcsf_array<T>;
         using base_type = xsparse_container<self_type>;
+        using semantic_base = xcontainer_semantic<self_type>;
         using storage_type = typename base_type::storage_type;
         using index_type = typename base_type::index_type;
         using value_type = typename base_type::value_type;
@@ -82,6 +83,12 @@ namespace xt
 
         xcsf_array(xcsf_array&&) = default;
         xcsf_array& operator=(xcsf_array&&) = default;
+
+        template <class E>
+        xcsf_array(const xexpression<E>& e);
+
+        template <class E>
+        self_type& operator=(const xexpression<E>& e);
     };
 
     /*****************************
@@ -99,6 +106,20 @@ namespace xt
         : base_type()
     {
         base_type::resize(shape);
+    }
+
+    template <class T>
+    template <class E>
+    inline xcsf_array<T>::xcsf_array(const xexpression<E>& e)
+    {
+        semantic_base::assign(e);
+    }
+
+    template <class T>
+    template <class E>
+    inline auto xcsf_array<T>::operator=(const xexpression<E>& e) -> self_type&
+    {
+        return semantic_base::operator=(e);
     }
 }
 

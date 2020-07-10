@@ -27,6 +27,7 @@ namespace xt
         using index_type = IT;
 
         using value_type = typename storage_type::value_type;
+        using reference = typename storage_type::reference;
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
         using const_pointer = typename storage_type::const_pointer;
@@ -58,6 +59,8 @@ namespace xt
         const_nz_iterator nz_cend() const;
 
     private:
+
+        const_pointer find_element_impl(const index_type& index) const;
 
         position_type m_pos;
         coordinate_type m_coords;
@@ -186,15 +189,13 @@ namespace xt
     template <class P, class C, class ST, class IT>
     inline auto xcoo_scheme<P, C, ST, IT>::find_element(const index_type& index) -> pointer
     {
-        auto it = std::find(m_coords.begin(), m_coords.end(), index);
-        return it == m_coords.end() ? nullptr : &*(m_storage.begin() + (it - m_coords.begin()));
+        return const_cast<pointer>(find_element_impl(index));
     }
 
     template <class P, class C, class ST, class IT>
     inline auto xcoo_scheme<P, C, ST, IT>::find_element(const index_type& index) const -> const_pointer
     {
-        auto it = std::find(m_coords.begin(), m_coords.end(), index);
-        return it == m_coords.end() ? nullptr : &*(m_storage.begin() + (it - m_coords.begin()));
+        return find_element_impl(index);
     }
 
     template <class P, class C, class ST, class IT>
@@ -244,6 +245,13 @@ namespace xt
         }
         using std::swap;
         swap(m_coords, new_coords);
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcoo_scheme<P, C, ST, IT>::find_element_impl(const index_type& index) const -> const_pointer
+    {
+        auto it = std::find(m_coords.begin(), m_coords.end(), index);
+        return it == m_coords.end() ? nullptr : &*(m_storage.begin() + (it - m_coords.begin()));
     }
 
     template <class P, class C, class ST, class IT>

@@ -31,6 +31,7 @@ namespace xt
         using reference = typename storage_type::reference;
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
+        using const_pointer = typename storage_type::const_pointer;
 
         using nz_iterator = xcsf_scheme_nz_iterator<self_type>;
         using const_nz_iterator = xcsf_scheme_nz_iterator<const self_type>;
@@ -42,6 +43,7 @@ namespace xt
         storage_type& storage();
 
         pointer find_element(const index_type& index);
+        const_pointer find_element(const index_type& index) const;
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
@@ -58,6 +60,8 @@ namespace xt
         const_nz_iterator nz_cend() const;
 
     private:        
+
+        const_pointer find_element_impl(const index_type& index) const;
 
         position_type m_pos;
         coordinate_type m_coords;
@@ -271,33 +275,13 @@ namespace xt
     template <class P, class C, class ST, class IT>
     inline auto xcsf_scheme<P, C, ST, IT>::find_element(const index_type& index) -> pointer
     {
-        if (m_pos.size() == 0)
-        {
-            return nullptr;
-        }
+        return const_cast<pointer>(find_element_impl(index));
+    }
 
-        std::size_t ielem = 0;
-        for(std::size_t i=0; i<index.size(); ++i)
-        {
-            auto it = std::find(m_coords[i].cbegin() + m_pos[i][ielem], m_coords[i].cbegin() + m_pos[i][ielem + 1], index[i]);
-            if (it != m_coords[i].cbegin() + m_pos[i][ielem + 1])
-            {
-                if (i == index.size() - 1)
-                {
-                    std::ptrdiff_t dst = std::distance(m_coords[i].cbegin(), it);
-                    return &(*(m_storage.begin() + dst));
-                }
-                else
-                {
-                    ielem = static_cast<std::size_t>(it - (m_coords[i].cbegin() + m_pos[i][ielem]));
-                }
-            }
-            else
-            {
-                return nullptr;
-            }
-        }
-        return &m_storage[ielem];
+    template <class P, class C, class ST, class IT>
+    inline auto xcsf_scheme<P, C, ST, IT>::find_element(const index_type& index) const -> const_pointer
+    {
+        return find_element_impl(index);
     }
 
     template <class P, class C, class ST, class IT>
@@ -350,6 +334,38 @@ namespace xt
         using std::swap;
         swap(m_pos, new_pos);
         swap(m_coords, new_coords);
+    }
+
+    template <class P, class C, class ST, class IT>
+    inline auto xcsf_scheme<P, C, ST, IT>::find_element_impl(const index_type& index) const -> const_pointer
+    {
+        if (m_pos.size() == 0)
+        {
+            return nullptr;
+        }
+
+        std::size_t ielem = 0;
+        for(std::size_t i=0; i<index.size(); ++i)
+        {
+            auto it = std::find(m_coords[i].cbegin() + m_pos[i][ielem], m_coords[i].cbegin() + m_pos[i][ielem + 1], index[i]);
+            if (it != m_coords[i].cbegin() + m_pos[i][ielem + 1])
+            {
+                if (i == index.size() - 1)
+                {
+                    std::ptrdiff_t dst = std::distance(m_coords[i].cbegin(), it);
+                    return &(*(m_storage.begin() + dst));
+                }
+                else
+                {
+                    ielem = static_cast<std::size_t>(it - (m_coords[i].cbegin() + m_pos[i][ielem]));
+                }
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
+        return &m_storage[ielem];
     }
 
     template <class P, class C, class ST, class IT>
