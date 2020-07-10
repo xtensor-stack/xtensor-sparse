@@ -2,6 +2,7 @@
 #define XSPARSE_MAP_ARRAY_HPP
 
 #include <map>
+#include <xtensor/xiterator.hpp>
 #include <xtensor/xstorage.hpp>
 
 #include "xmap_scheme.hpp"
@@ -38,6 +39,15 @@ namespace xt
         using reference = xsparse_reference<scheme_type>;
     };
     
+    template <class T>
+    struct xiterable_inner_types<xmap_array<T>>
+    {
+        using array_type = xmap_array<T>;
+        using inner_shape_type = typename xcontainer_inner_types<array_type>::shape_type;
+        using const_stepper = xindexed_stepper<array_type, true>;
+        using stepper = xindexed_stepper<array_type, false>;
+    };
+
     template <class T>
     class xmap_array : public xsparse_container<xmap_array<T>> 
     {

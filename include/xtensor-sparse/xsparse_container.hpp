@@ -2,6 +2,7 @@
 #define XSPARSE_XSPARSE_CONTAINER_HPP
 
 #include <xtensor/xaccessible.hpp>
+#include <xtensor/xiterable.hpp>
 #include <xtensor/xstrides.hpp>
 
 #include "xsparse_reference.hpp"
@@ -13,7 +14,8 @@ namespace xt
      *********************/
 
     template <class D>
-    class xsparse_container: private xaccessible<D>
+    class xsparse_container: public xiterable<D>,
+                             private xaccessible<D>
     {
     public:
 
@@ -36,6 +38,9 @@ namespace xt
         using strides_type = typename inner_types::strides_type;
 
         using accessible_base = xaccessible<D>;
+        using iterable_base = xiterable<D>;
+        using stepper = typename iterable_base::stepper;
+        using const_stepper = typename iterable_base::const_stepper;
 
         size_type size() const noexcept;
         size_type dimension() const noexcept;
@@ -68,6 +73,16 @@ namespace xt
         template <class It>
         const_reference element(It first, It last) const;
 
+        template <class S>
+        stepper stepper_begin(const S& shape) noexcept;
+        template <class S>
+        stepper stepper_end(const S& shape, layout_type l) noexcept;
+
+        template <class S>
+        const_stepper stepper_begin(const S& shape) const noexcept;
+        template <class S>
+        const_stepper stepper_end(const S& shape, layout_type l) const noexcept;
+
     protected:
 
         xsparse_container() = default;
@@ -96,6 +111,10 @@ namespace xt
 
         const_reference access_impl(index_type index) const;
         reference access_impl(index_type index);
+
+        derived_type& derived_cast() & noexcept;
+        const derived_type& derived_cast() const & noexcept;
+        derived_type derived_cast() && noexcept;
 
         static const value_type ZERO;
 
@@ -203,6 +222,38 @@ namespace xt
     {
         XTENSOR_TRY(check_element_index(shape(), first, last));
         return access_impl(make_index_from_it(first, last));
+    }
+
+    template <class D>
+    template <class S>
+    inline auto xsparse_container<D>::stepper_begin(const S& shape) noexcept -> stepper
+    {
+        size_type offset = shape.size() - this->dimension();
+        return stepper(&(this->derived_cast()), offset);
+    }
+
+    template <class D>
+    template <class S>
+    inline auto xsparse_container<D>::stepper_end(const S& shape, layout_type) noexcept -> stepper
+    {
+        size_type offset = shape.size() - this->dimension();
+        return stepper(&(this->derived_cast()), offset, true);
+    }
+
+    template <class D>
+    template <class S>
+    inline auto xsparse_container<D>::stepper_begin(const S& shape) const noexcept -> const_stepper
+    {
+        size_type offset = shape.size() - this->dimension();
+        return const_stepper(&(this->derived_cast()), offset);
+    }
+
+    template <class D>
+    template <class S>
+    inline auto xsparse_container<D>::stepper_end(const S& shape, layout_type) const noexcept -> const_stepper
+    {
+        size_type offset = shape.size() - this->dimension();
+        return const_stepper(&(this->derived_cast()), offset, true);
     }
 
     template <class D>
@@ -321,6 +372,23 @@ namespace xt
         return reference(m_scheme, std::move(index), v);
     }
 
+    template <class D>
+    inline auto xsparse_container<D>::derived_cast() & noexcept -> derived_type&
+    {
+        return *static_cast<derived_type*>(this);
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::derived_cast() const & noexcept -> const derived_type&
+    {
+        return *static_cast<const derived_type*>(this);
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::derived_cast() && noexcept -> derived_type
+    {
+        return *static_cast<derived_type*>(this);
+    }
 }
 
 #endif

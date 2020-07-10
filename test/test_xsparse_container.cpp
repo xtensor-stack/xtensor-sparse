@@ -66,4 +66,23 @@ namespace xt
         index = {0, 2};
         EXPECT_EQ(A.element(index.cbegin(), index.cend()), 0);
     }
+
+    TYPED_TEST(container_test, iterator)
+    {
+        std::vector<std::size_t> shape{2, 5};
+        TypeParam A(shape);
+
+        A(0, 0) = 3.;
+        A(1, 2) = 10.;
+
+        auto it = A.begin();
+        EXPECT_EQ(*it, 3);
+        ++it;
+        EXPECT_EQ(*it, 0.);
+        it += 6;
+        EXPECT_EQ(*it, 10.);
+        it += 3;
+        EXPECT_EQ(it, A.end());
+    }
+
 }

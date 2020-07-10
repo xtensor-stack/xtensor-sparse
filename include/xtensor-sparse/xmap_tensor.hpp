@@ -4,6 +4,8 @@
 #include <array>
 #include <map>
 
+#include <xtensor/xiterator.hpp>
+
 #include "xmap_scheme.hpp"
 #include "xsparse_container.hpp"
 
@@ -36,6 +38,15 @@ namespace xt
         using scheme_type = xmap_scheme<storage_type>;
 
         using reference = xsparse_reference<scheme_type>;
+    };
+
+    template <class T, std::size_t N>
+    struct xiterable_inner_types<xmap_tensor<T, N>>
+    {
+        using array_type = xmap_tensor<T, N>;
+        using inner_shape_type = typename xcontainer_inner_types<array_type>::shape_type;
+        using const_stepper = xindexed_stepper<array_type, true>;
+        using stepper = xindexed_stepper<array_type, false>;
     };
 
     template<class T, std::size_t N>
