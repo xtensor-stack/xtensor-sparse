@@ -9,7 +9,7 @@
 namespace xt
 {
     template <class scheme>
-    class xcoo_scheme_iterator;
+    class xcoo_scheme_nz_iterator;
 
     /***************
      * xcoo_scheme *
@@ -34,8 +34,8 @@ namespace xt
         const coordinate_type& coordinate() const;
         const storage_type& storage() const;
 
-        using iterator = xcoo_scheme_iterator<self_type>;
-        using const_iterator = xcoo_scheme_iterator<const self_type>;
+        using nz_iterator = xcoo_scheme_nz_iterator<self_type>;
+        using const_nz_iterator = xcoo_scheme_nz_iterator<const self_type>;
 
         xcoo_scheme();
 
@@ -48,12 +48,12 @@ namespace xt
                             const strides_type& new_strides,
                             const shape_type& new_shape);
 
-        iterator begin();
-        iterator end();
-        const_iterator begin() const;
-        const_iterator end() const;
-        const_iterator cbegin() const;
-        const_iterator cend() const;
+        nz_iterator nz_begin();
+        nz_iterator nz_end();
+        const_nz_iterator nz_begin() const;
+        const_nz_iterator nz_end() const;
+        const_nz_iterator nz_cbegin() const;
+        const_nz_iterator nz_cend() const;
 
     private:
 
@@ -61,13 +61,13 @@ namespace xt
         coordinate_type m_coords;
         storage_type m_storage;
 
-        friend class xcoo_scheme_iterator<self_type>;
-        friend class xcoo_scheme_iterator<const self_type>;
+        friend class xcoo_scheme_nz_iterator<self_type>;
+        friend class xcoo_scheme_nz_iterator<const self_type>;
     };
 
-    /************************
-     * xcoo_scheme_iterator *
-     ************************/
+    /***************************
+     * xcoo_scheme_nz_iterator *
+     ***************************/
 
     namespace detail
     {
@@ -86,7 +86,7 @@ namespace xt
         };
 
         template <class scheme>
-        struct xcoo_scheme_iterator_types : xcoo_scheme_storage_type<scheme>
+        struct xcoo_scheme_nz_iterator_types : xcoo_scheme_storage_type<scheme>
         {
             using base_type = xcoo_scheme_storage_type<scheme>;
             using index_type = typename scheme::index_type;
@@ -101,14 +101,14 @@ namespace xt
     }
 
     template <class scheme>
-    class xcoo_scheme_iterator : xtl::xrandom_access_iterator_base3<xcoo_scheme_iterator<scheme>,
-                                                                    detail::xcoo_scheme_iterator_types<scheme>>
+    class xcoo_scheme_nz_iterator : xtl::xrandom_access_iterator_base3<xcoo_scheme_nz_iterator<scheme>,
+                                                                       detail::xcoo_scheme_nz_iterator_types<scheme>>
     {
     public:
 
-        using self_type = xcoo_scheme_iterator<scheme>;
+        using self_type = xcoo_scheme_nz_iterator<scheme>;
         using scheme_type = scheme;
-        using iterator_types = detail::xcoo_scheme_iterator_types<scheme>;
+        using iterator_types = detail::xcoo_scheme_nz_iterator_types<scheme>;
         using index_type = typename iterator_types::index_type;
         using coordinate_type = typename iterator_types::coordinate_type;
         using coordinate_iterator = typename iterator_types::coordinate_iterator;
@@ -119,8 +119,8 @@ namespace xt
         using difference_type = typename iterator_types::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
-        xcoo_scheme_iterator();
-        xcoo_scheme_iterator(scheme& s, coordinate_iterator cit, value_iterator vit);
+        xcoo_scheme_nz_iterator();
+        xcoo_scheme_nz_iterator(scheme& s, coordinate_iterator cit, value_iterator vit);
 
         self_type& operator++();
         self_type& operator--();
@@ -145,12 +145,12 @@ namespace xt
     };
 
     template <class S>
-    bool operator==(const xcoo_scheme_iterator<S>& lhs,
-                    const xcoo_scheme_iterator<S>& rhs);
+    bool operator==(const xcoo_scheme_nz_iterator<S>& lhs,
+                    const xcoo_scheme_nz_iterator<S>& rhs);
 
     template <class S>
-    bool operator<(const xcoo_scheme_iterator<S>& lhs,
-                   const xcoo_scheme_iterator<S>& rhs);
+    bool operator<(const xcoo_scheme_nz_iterator<S>& lhs,
+                   const xcoo_scheme_nz_iterator<S>& rhs);
 
     /******************************
      * xcoo_scheme implementation *
@@ -237,53 +237,53 @@ namespace xt
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::begin() -> iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_begin() -> nz_iterator
     {
-        return iterator(*this, m_coords.cbegin(), m_storage.begin());
+        return nz_iterator(*this, m_coords.cbegin(), m_storage.begin());
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::end() -> iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_end() -> nz_iterator
     {
-        return iterator(*this, m_coords.cend(), m_storage.end());
+        return nz_iterator(*this, m_coords.cend(), m_storage.end());
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::begin() const -> const_iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_begin() const -> const_nz_iterator
     {
-        return cbegin();
+        return nz_cbegin();
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::end() const -> const_iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_end() const -> const_nz_iterator
     {
-        return cend();
+        return nz_cend();
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::cbegin() const -> const_iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_cbegin() const -> const_nz_iterator
     {
-        return const_iterator(*this, m_coords.cbegin(), m_storage.cbegin());
+        return const_nz_iterator(*this, m_coords.cbegin(), m_storage.cbegin());
     }
 
     template <class P, class C, class ST, class IT>
-    inline auto xcoo_scheme<P, C, ST, IT>::cend() const -> const_iterator
+    inline auto xcoo_scheme<P, C, ST, IT>::nz_cend() const -> const_nz_iterator
     {
-        return const_iterator(*this, m_coords.cend(), m_storage.cend());
+        return const_nz_iterator(*this, m_coords.cend(), m_storage.cend());
     }
 
-    /***************************************
-     * xcoo_scheme_iterator implementation *
-     ***************************************/
+    /******************************************
+     * xcoo_scheme_nz_iterator implementation *
+     ******************************************/
 
     template <class S>
-    inline xcoo_scheme_iterator<S>::xcoo_scheme_iterator()
+    inline xcoo_scheme_nz_iterator<S>::xcoo_scheme_nz_iterator()
         : p_scheme(nullptr)
     {
     }
 
     template <class S>
-    inline xcoo_scheme_iterator<S>::xcoo_scheme_iterator(S& s,
+    inline xcoo_scheme_nz_iterator<S>::xcoo_scheme_nz_iterator(S& s,
                                                          coordinate_iterator cit,
                                                          value_iterator vit)
         : p_scheme(&s)
@@ -293,7 +293,7 @@ namespace xt
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator++() -> self_type&
+    inline auto xcoo_scheme_nz_iterator<S>::operator++() -> self_type&
     {
         ++m_cit;
         ++m_vit;
@@ -301,7 +301,7 @@ namespace xt
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator--() -> self_type&
+    inline auto xcoo_scheme_nz_iterator<S>::operator--() -> self_type&
     {
         --m_cit;
         --m_vit;
@@ -309,7 +309,7 @@ namespace xt
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator+=(difference_type n) -> self_type&
+    inline auto xcoo_scheme_nz_iterator<S>::operator+=(difference_type n) -> self_type&
     {
         m_cit += n;
         m_vit += n;
@@ -317,7 +317,7 @@ namespace xt
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator-=(difference_type n) -> self_type&
+    inline auto xcoo_scheme_nz_iterator<S>::operator-=(difference_type n) -> self_type&
     {
         m_cit -= n;
         m_vit -= n;
@@ -325,51 +325,51 @@ namespace xt
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator-(const self_type& rhs) const -> difference_type
+    inline auto xcoo_scheme_nz_iterator<S>::operator-(const self_type& rhs) const -> difference_type
     {
         return m_cit - rhs.m_cit;
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator*() const -> reference
+    inline auto xcoo_scheme_nz_iterator<S>::operator*() const -> reference
     {
         return *m_vit;
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::operator->() const -> pointer
+    inline auto xcoo_scheme_nz_iterator<S>::operator->() const -> pointer
     {
         return &(*m_vit);
     }
 
     template <class S>
-    inline auto xcoo_scheme_iterator<S>::index() const -> const index_type&
+    inline auto xcoo_scheme_nz_iterator<S>::index() const -> const index_type&
     {
         return *m_cit;
     }
 
     template <class S>
-    inline bool xcoo_scheme_iterator<S>::equal(const self_type& rhs) const
+    inline bool xcoo_scheme_nz_iterator<S>::equal(const self_type& rhs) const
     {
         return p_scheme == rhs.p_scheme && m_cit == rhs.m_cit && m_vit == rhs.m_vit;
     }
 
     template <class S>
-    inline bool xcoo_scheme_iterator<S>::less_than(const self_type& rhs) const
+    inline bool xcoo_scheme_nz_iterator<S>::less_than(const self_type& rhs) const
     {
         return p_scheme == rhs.p_scheme && m_cit < rhs.m_cit && m_vit < rhs.m_vit;
     }
 
     template <class S>
-    inline bool operator==(const xcoo_scheme_iterator<S>& lhs,
-                           const xcoo_scheme_iterator<S>& rhs)
+    inline bool operator==(const xcoo_scheme_nz_iterator<S>& lhs,
+                           const xcoo_scheme_nz_iterator<S>& rhs)
     {
         return lhs.equal(rhs);
     }
 
     template <class S>
-    inline bool operator<(const xcoo_scheme_iterator<S>& lhs,
-                          const xcoo_scheme_iterator<S>& rhs)
+    inline bool operator<(const xcoo_scheme_nz_iterator<S>& lhs,
+                          const xcoo_scheme_nz_iterator<S>& rhs)
     {
         return lhs.less_than(rhs);
     }

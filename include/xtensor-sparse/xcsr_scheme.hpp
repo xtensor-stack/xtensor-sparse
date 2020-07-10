@@ -1,7 +1,6 @@
 #ifndef XSPARSE_CSR_SCHEME_HPP
 #define XSPARSE_CSR_SCHEME_HPP
 
-#include <iterator>
 #include <type_traits>
 
 #include <xtensor/xstorage.hpp>
@@ -13,11 +12,12 @@
 namespace xt
 {
     template <class scheme>
-    class xcsr_scheme_iterator;
+    class xcsr_scheme_nz_iterator;
 
     /***************************
      * xcsr_scheme declaration *
      ***************************/
+
     template <class P, class C, class ST>
     class xcsr_scheme
     {
@@ -34,8 +34,8 @@ namespace xt
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
 
-        using iterator = xcsr_scheme_iterator<self_type>;
-        using const_iterator = xcsr_scheme_iterator<const self_type>;
+        using nz_iterator = xcsr_scheme_nz_iterator<self_type>;
+        using const_nz_iterator = xcsr_scheme_nz_iterator<const self_type>;
 
         xcsr_scheme(std::size_t size);
 
@@ -54,12 +54,12 @@ namespace xt
                             const strides_type& new_strides,
                             const shape_type& new_shape);
 
-        iterator begin();
-        iterator end();
-        const_iterator begin() const;
-        const_iterator end() const;
-        const_iterator cbegin() const;
-        const_iterator cend() const;
+        nz_iterator nz_begin();
+        nz_iterator nz_end();
+        const_nz_iterator nz_begin() const;
+        const_nz_iterator nz_end() const;
+        const_nz_iterator nz_cbegin() const;
+        const_nz_iterator nz_cend() const;
 
     private:
 
@@ -67,13 +67,13 @@ namespace xt
         coordinate_type m_coords;
         storage_type m_storage;
 
-        friend class xcsr_scheme_iterator<self_type>;
-        friend class xcsr_scheme_iterator<const self_type>;
+        friend class xcsr_scheme_nz_iterator<self_type>;
+        friend class xcsr_scheme_nz_iterator<const self_type>;
     };
 
-    /************************************
-     * xcsr_scheme_iterator declaration *
-     ************************************/
+    /***************************************
+     * xcsr_scheme_nz_iterator declaration *
+     ***************************************/
 
     namespace detail
     {
@@ -92,7 +92,7 @@ namespace xt
         };
 
         template <class scheme>
-        struct xcsr_scheme_iterator_types : xcsr_scheme_storage_type<scheme>
+        struct xcsr_scheme_nz_iterator_types : xcsr_scheme_storage_type<scheme>
         {
             using base_type = xcsr_scheme_storage_type<scheme>;
             using index_type = typename scheme::index_type;
@@ -109,13 +109,13 @@ namespace xt
     }
 
     template <class scheme>
-    class xcsr_scheme_iterator: public xtl::xrandom_access_iterator_base3<xcsr_scheme_iterator<scheme>,
-                                                                          detail::xcsr_scheme_iterator_types<scheme>>
+    class xcsr_scheme_nz_iterator: public xtl::xrandom_access_iterator_base3<xcsr_scheme_nz_iterator<scheme>,
+                                                                          detail::xcsr_scheme_nz_iterator_types<scheme>>
     {
     public:
-        using self_type = xcsr_scheme_iterator;
+        using self_type = xcsr_scheme_nz_iterator;
         using xcsr_scheme = scheme;
-        using iterator_types = detail::xcsr_scheme_iterator_types<scheme>;
+        using iterator_types = detail::xcsr_scheme_nz_iterator_types<scheme>;
         using index_type = typename iterator_types::index_type;
         using position_type = typename iterator_types::position_type;
         using position_iterator = typename iterator_types::position_iterator;
@@ -128,7 +128,7 @@ namespace xt
         using difference_type = typename iterator_types::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
-        xcsr_scheme_iterator(scheme& s, position_iterator&& pit, coordinate_iterator&& cit);
+        xcsr_scheme_nz_iterator(scheme& s, position_iterator&& pit, coordinate_iterator&& cit);
 
         self_type& operator++();
         self_type& operator--();
@@ -156,12 +156,12 @@ namespace xt
     };
 
     template <class scheme>
-    bool operator==(const xcsr_scheme_iterator<scheme>& lhs,
-                    const xcsr_scheme_iterator<scheme>& rhs);
+    bool operator==(const xcsr_scheme_nz_iterator<scheme>& lhs,
+                    const xcsr_scheme_nz_iterator<scheme>& rhs);
 
     template <class scheme>
-    bool operator<(const xcsr_scheme_iterator<scheme>& lhs,
-                   const xcsr_scheme_iterator<scheme>& rhs);
+    bool operator<(const xcsr_scheme_nz_iterator<scheme>& lhs,
+                   const xcsr_scheme_nz_iterator<scheme>& rhs);
 
     /******************************
      * xcsr_scheme implementation *
@@ -291,39 +291,39 @@ namespace xt
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::begin() -> iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_begin() -> nz_iterator
     {
-        return iterator(*this, m_pos.cbegin(), m_coords.cbegin());
+        return nz_iterator(*this, m_pos.cbegin(), m_coords.cbegin());
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::end() -> iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_end() -> nz_iterator
     {
-        return iterator(*this, m_pos.cend() - 2, m_coords.cend());
+        return nz_iterator(*this, m_pos.cend() - 2, m_coords.cend());
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::begin() const -> const_iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_begin() const -> const_nz_iterator
     {
-        return cbegin();
+        return nz_cbegin();
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::end() const -> const_iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_end() const -> const_nz_iterator
     {
-        return cend();
+        return nz_cend();
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::cbegin() const -> const_iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_cbegin() const -> const_nz_iterator
     {
-        return const_iterator(*this, m_pos.cbegin(), m_coords.cbegin());
+        return const_nz_iterator(*this, m_pos.cbegin(), m_coords.cbegin());
     }
 
     template <class P, class C, class ST>
-    inline auto xcsr_scheme<P, C, ST>::cend() const -> const_iterator
+    inline auto xcsr_scheme<P, C, ST>::nz_cend() const -> const_nz_iterator
     {
-        return const_iterator(*this, m_pos.cend() - 2, m_coords.cend());
+        return const_nz_iterator(*this, m_pos.cend() - 2, m_coords.cend());
     }
 
     template <class P, class C, class ST>
@@ -333,11 +333,11 @@ namespace xt
     }
 
     /***************************************
-     * xcsr_scheme_iterator implementation *
+     * xcsr_scheme_nz_iterator implementation *
      ***************************************/
 
     template <class scheme>
-    inline xcsr_scheme_iterator<scheme>::xcsr_scheme_iterator(
+    inline xcsr_scheme_nz_iterator<scheme>::xcsr_scheme_nz_iterator(
         scheme& s, 
         position_iterator&& pit,
         coordinate_iterator&& cit)
@@ -349,7 +349,7 @@ namespace xt
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator++() -> self_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator++() -> self_type&
     {
         ++m_cit;
         auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate().cbegin(), m_cit));
@@ -361,7 +361,7 @@ namespace xt
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator--() -> self_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator--() -> self_type&
     {
         --m_cit;
         auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate().cbegin(), m_cit));
@@ -373,7 +373,7 @@ namespace xt
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator+=(difference_type n) -> self_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator+=(difference_type n) -> self_type&
     {
         m_cit += n;
         auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate().cbegin(), m_cit));
@@ -385,7 +385,7 @@ namespace xt
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator-=(difference_type n) -> self_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator-=(difference_type n) -> self_type&
     {
         m_cit -= n;
         auto dst = static_cast<std::size_t>(std::distance(p_scheme->coordinate().cbegin(), m_cit));
@@ -397,33 +397,33 @@ namespace xt
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator-(const self_type& rhs) const -> difference_type
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator-(const self_type& rhs) const -> difference_type
     {
         return m_cit - rhs.m_cit;
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator*() const -> reference
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator*() const -> reference
     {
         std::ptrdiff_t dst = std::distance(p_scheme->coordinate().cbegin(), m_cit);
         return *(p_scheme->storage().begin() + dst);
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::operator->() const -> pointer
+    inline auto xcsr_scheme_nz_iterator<scheme>::operator->() const -> pointer
     {
         std::ptrdiff_t dst = std::distance(p_scheme->coordinate().cbegin(), m_cit);
         return &(p_scheme->storage().begin() + dst);
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::index() const -> const index_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::index() const -> const index_type&
     {
         return update_current_index();
     }
 
     template <class scheme>
-    inline auto xcsr_scheme_iterator<scheme>::update_current_index() const -> index_type&
+    inline auto xcsr_scheme_nz_iterator<scheme>::update_current_index() const -> index_type&
     {
         m_current_index[0] = static_cast<std::size_t>(std::distance(p_scheme->position().cbegin(), m_pit));
         m_current_index[1] = *m_cit;
@@ -431,27 +431,27 @@ namespace xt
     }
 
     template <class scheme>
-    inline bool xcsr_scheme_iterator<scheme>::equal(const self_type& rhs) const
+    inline bool xcsr_scheme_nz_iterator<scheme>::equal(const self_type& rhs) const
     {
         return p_scheme == rhs.p_scheme && m_cit == rhs.m_cit;
     }
 
     template <class scheme>
-    inline bool xcsr_scheme_iterator<scheme>::less_than(const self_type& rhs) const
+    inline bool xcsr_scheme_nz_iterator<scheme>::less_than(const self_type& rhs) const
     {
         return p_scheme == rhs.p_scheme && m_cit < rhs.m_cit;
     }
 
     template <class scheme>
-    inline bool operator==(const xcsr_scheme_iterator<scheme>& lhs,
-                           const xcsr_scheme_iterator<scheme>& rhs)
+    inline bool operator==(const xcsr_scheme_nz_iterator<scheme>& lhs,
+                           const xcsr_scheme_nz_iterator<scheme>& rhs)
     {
         return lhs.equal(rhs);
     }
 
     template <class scheme>
-    inline bool operator<(const xcsr_scheme_iterator<scheme>& lhs,
-                          const xcsr_scheme_iterator<scheme>& rhs)
+    inline bool operator<(const xcsr_scheme_nz_iterator<scheme>& lhs,
+                          const xcsr_scheme_nz_iterator<scheme>& rhs)
     {
         return lhs.less_than(rhs);
     }

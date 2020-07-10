@@ -97,7 +97,7 @@ namespace xt
     TYPED_TEST(coo_scheme_iterator, increment)
     {
         TypeParam scheme = make_coo_scheme();
-        auto it = scheme.begin();
+        auto it = scheme.nz_begin();
         EXPECT_EQ(*it, 2.5);
         EXPECT_EQ(it.index(), index_type({0, 2}));
         ++it;
@@ -110,9 +110,9 @@ namespace xt
         EXPECT_EQ(*it, 5.4);
         EXPECT_EQ(it.index(), index_type({2, 7}));
         ++it;
-        EXPECT_EQ(it, scheme.end());
+        EXPECT_EQ(it, scheme.nz_end());
 
-        auto it2 = scheme.begin();
+        auto it2 = scheme.nz_begin();
         it2 += 2;
         EXPECT_EQ(*it2, 3.0);
         EXPECT_EQ(it2.index(), index_type({1, 1}));
@@ -121,7 +121,7 @@ namespace xt
     TYPED_TEST(coo_scheme_iterator, decrement)
     {
         TypeParam scheme = make_coo_scheme();
-        auto it = scheme.end();
+        auto it = scheme.nz_end();
         --it;
         EXPECT_EQ(*it, 5.4);
         EXPECT_EQ(it.index(), index_type({2, 7}));
@@ -134,9 +134,9 @@ namespace xt
         --it;
         EXPECT_EQ(*it, 2.5);
         EXPECT_EQ(it.index(), index_type({0, 2}));
-        EXPECT_EQ(it, scheme.begin());
+        EXPECT_EQ(it, scheme.nz_begin());
 
-        auto it2 = scheme.end();
+        auto it2 = scheme.nz_end();
         it2 -= 2;
         EXPECT_EQ(*it2, 3.0);
         EXPECT_EQ(it2.index(), index_type({1, 1}));
