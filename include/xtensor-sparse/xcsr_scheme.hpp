@@ -110,9 +110,10 @@ namespace xt
 
     template <class scheme>
     class xcsr_scheme_nz_iterator: public xtl::xrandom_access_iterator_base3<xcsr_scheme_nz_iterator<scheme>,
-                                                                          detail::xcsr_scheme_nz_iterator_types<scheme>>
+                                                                             detail::xcsr_scheme_nz_iterator_types<scheme>>
     {
     public:
+
         using self_type = xcsr_scheme_nz_iterator;
         using xcsr_scheme = scheme;
         using iterator_types = detail::xcsr_scheme_nz_iterator_types<scheme>;

@@ -9,12 +9,13 @@
 
 namespace xt
 {
-    template <class Scheme, bool is_const>
+    template <class scheme>
     class xcsf_scheme_nz_iterator;
 
     /***************************
      * xcsf_scheme declaration *
      ***************************/
+
     template <class P, class C, class ST, class IT = svector<std::size_t>>
     class xcsf_scheme
     {
@@ -31,8 +32,8 @@ namespace xt
         using const_reference = typename storage_type::const_reference;
         using pointer = typename storage_type::pointer;
 
-        using nz_iterator = xcsf_scheme_nz_iterator<self_type, false>;
-        using const_nz_iterator = xcsf_scheme_nz_iterator<self_type, true>;
+        using nz_iterator = xcsf_scheme_nz_iterator<self_type>;
+        using const_nz_iterator = xcsf_scheme_nz_iterator<const self_type>;
 
         const position_type& position() const;
         const coordinate_type& coordinate() const;
@@ -62,34 +63,86 @@ namespace xt
         coordinate_type m_coords;
         storage_type m_storage;
 
-        friend class xcsf_scheme_nz_iterator<self_type, false>;
-        friend class xcsf_scheme_nz_iterator<self_type, true>;
+        friend class xcsf_scheme_nz_iterator<self_type>;
+        friend class xcsf_scheme_nz_iterator<const self_type>;
     };
 
     /***************************************
      * xcsf_scheme_nz_iterator declaration *
      ***************************************/
 
-    template <class Scheme, bool is_const>
-    class xcsf_scheme_nz_iterator
+    namespace detail
+    {
+        template <class scheme>
+        struct xcsf_scheme_storage_type
+        {
+            using storage_type = typename scheme::storage_type;
+            using value_iterator = typename storage_type::iterator;
+        };
+
+        template <class scheme>
+        struct xcsf_scheme_storage_type<const scheme>
+        {
+            using storage_type = typename scheme::storage_type;
+            using value_iterator = typename storage_type::const_iterator;
+        };
+
+        template <class scheme>
+        struct xcsf_scheme_nz_iterator_types : xcsf_scheme_storage_type<scheme>
+        {
+            using base_type = xcsf_scheme_storage_type<scheme>;
+            using index_type = typename scheme::index_type;
+            using position_type = typename scheme::position_type;
+            using position_iterator = typename position_type::const_iterator;
+            using coordinate_type = typename scheme::coordinate_type;
+            using coordinate_iterator = typename coordinate_type::const_iterator;
+            using value_iterator = typename base_type::value_iterator;
+            using value_type = typename value_iterator::value_type;
+            using reference = typename value_iterator::reference;
+            using pointer = typename value_iterator::pointer;
+            using difference_type = typename value_iterator::difference_type;
+        };
+    }
+
+    template <class scheme>
+    class xcsf_scheme_nz_iterator: public xtl::xrandom_access_iterator_base3<xcsf_scheme_nz_iterator<scheme>,
+                                                                             detail::xcsf_scheme_nz_iterator_types<scheme>>
     {
     public:
-        using self_type = xcsf_scheme_nz_iterator;
-        using xcsf_scheme = Scheme;
-        using index_type = typename Scheme::index_type;
-        using index_type_iterator = svector<typename index_type::const_iterator>;
-        using reference = std::conditional_t<is_const,
-                                             typename Scheme::const_reference,
-                                             typename Scheme::reference>;
 
-        xcsf_scheme_nz_iterator(Scheme& scheme, index_type_iterator&& pos_index, index_type_iterator&& coord_index);
+        using self_type = xcsf_scheme_nz_iterator;
+        using xcsf_scheme = scheme;
+        using iterator_types = detail::xcsf_scheme_nz_iterator_types<scheme>;
+        using index_type = typename iterator_types::index_type;
+        using index_type_iterator = svector<typename index_type::const_iterator>;
+        using position_type = typename iterator_types::position_type;
+        using position_iterator = typename iterator_types::position_iterator;
+        using coordinate_type = typename iterator_types::coordinate_type;
+        using coordinate_iterator = typename iterator_types::coordinate_iterator;
+        using value_type = typename iterator_types::value_type;
+        using value_iterator = typename iterator_types::value_iterator;
+        using reference = typename iterator_types::reference;
+        using pointer = typename iterator_types::pointer;
+        using difference_type = typename iterator_types::difference_type;
+        using iterator_category = std::random_access_iterator_tag;
+
+        xcsf_scheme_nz_iterator(scheme& s, index_type_iterator&& pos_index, index_type_iterator&& coord_index);
 
         self_type& operator++();
         self_type& operator--();
 
-        index_type& index() const;
-        reference value() const;
-        
+        self_type& operator+=(difference_type n);
+        self_type& operator-=(difference_type n);
+
+        difference_type operator-(const self_type& rhs) const;
+
+        reference operator*() const;
+        pointer operator->() const;
+        const index_type& index() const;
+
+        bool equal(const self_type& rhs) const;
+        bool less_than(const self_type& rhs) const;
+
     private:
 
         index_type& update_current_index() const;
@@ -310,9 +363,7 @@ namespace xt
             pos_index[d] = m_pos[d].cbegin();
             coord_index[d] = m_coords[d].cbegin();
         }
-        return xcsf_scheme_nz_iterator<self_type, false>(*this,
-                                                         std::move(pos_index),
-                                                         std::move(coord_index));
+        return nz_iterator(*this, std::move(pos_index), std::move(coord_index));
     }
 
     template <class P, class C, class ST, class IT>
@@ -328,9 +379,7 @@ namespace xt
         }
         ++coord_index.back();
 
-        return xcsf_scheme_nz_iterator<self_type, false>(*this,
-                                                         std::move(pos_index),
-                                                         std::move(coord_index));
+        return nz_iterator(*this, std::move(pos_index), std::move(coord_index));
     }
 
     template <class P, class C, class ST, class IT>
@@ -356,9 +405,7 @@ namespace xt
             pos_index[d] = m_pos[d].cbegin();
             coord_index[d] = m_coords[d].cbegin();
         }
-        return xcsf_scheme_nz_iterator<self_type, false>(*this,
-                                                         std::move(pos_index),
-                                                         std::move(coord_index));
+        return const_nz_iterator(*this, std::move(pos_index), std::move(coord_index));
     }
 
     template <class P, class C, class ST, class IT>
@@ -374,9 +421,7 @@ namespace xt
         }
         ++coord_index.back();
 
-        return xcsf_scheme_nz_iterator<self_type, false>(*this,
-                                                         std::move(pos_index),
-                                                         std::move(coord_index));
+        return const_nz_iterator(*this, std::move(pos_index), std::move(coord_index));
     }
 
     template <class P, class C, class ST, class IT>
@@ -389,21 +434,21 @@ namespace xt
      * xcsf_scheme_nz_iterator implementation *
      ******************************************/
 
-    template <class Scheme, bool is_const>
-    inline xcsf_scheme_nz_iterator<Scheme, is_const>::xcsf_scheme_nz_iterator(
-        Scheme& scheme, 
+    template <class scheme>
+    inline xcsf_scheme_nz_iterator<scheme>::xcsf_scheme_nz_iterator(
+        scheme& s, 
         index_type_iterator&& pos_index,
         index_type_iterator&& coord_index)
         : m_pos_index(std::move(pos_index))
         , m_coord_index(std::move(coord_index))
-        , p_scheme(&scheme)
+        , p_scheme(&s)
     {
         m_current_index.resize(m_pos_index.size());
         update_current_index();
     }
 
-    template <class Scheme, bool is_const>
-    inline auto xcsf_scheme_nz_iterator<Scheme, is_const>::operator++() -> self_type&
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator++() -> self_type&
     {
         for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
         {
@@ -427,8 +472,8 @@ namespace xt
         return *this;
     }
 
-    template <class Scheme, bool is_const>
-    inline auto xcsf_scheme_nz_iterator<Scheme, is_const>::operator--() -> self_type&
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator--() -> self_type&
     {
         for (std::size_t i = m_coord_index.size(); i != std::size_t(0); --i)
         {
@@ -452,28 +497,72 @@ namespace xt
         }
         return *this;
     }
+    
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator+=(difference_type n) -> self_type&
+    {
+        for (difference_type i = 0; i < n; ++i)
+        {
+            ++(*this);
+        }
+        return *this;
+    }
+    
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator-=(difference_type n) -> self_type&
+    {
+        for (difference_type i = 0; i < n; ++i)
+        {
+            --(*this);
+        }
+        return *this;
+    }
 
-    template <class Scheme, bool is_const>
-    inline auto xcsf_scheme_nz_iterator<Scheme, is_const>::index() const -> index_type&
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator-(const self_type& rhs) const -> difference_type
+    {
+        return m_coord_index.back() - rhs.m_coord_index.back();
+    }
+
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator*() const -> reference
+    {
+        std::ptrdiff_t dst = std::distance(p_scheme->coordinate().back().begin(), m_coord_index.back());
+        return *(p_scheme->storage().begin() + dst);
+    }
+
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::operator->() const -> pointer
+    {
+        return &(this->operator*());
+    }
+
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::index() const -> const index_type&
     {
         return update_current_index();
     }
 
-    template <class Scheme, bool is_const>
-    inline auto xcsf_scheme_nz_iterator<Scheme, is_const>::update_current_index() const -> index_type&
+    template <class scheme>
+    inline bool xcsf_scheme_nz_iterator<scheme>::equal(const self_type& rhs) const
+    {
+        return p_scheme == rhs.p_scheme && m_coord_index.back() == rhs.m_coord_index.back();
+    }
+
+    template <class scheme>
+    inline bool xcsf_scheme_nz_iterator<scheme>::less_than(const self_type& rhs) const
+    {
+        return p_scheme == rhs.p_scheme && m_coord_index.back() < rhs.m_coord_index.back();
+    }
+    
+    template <class scheme>
+    inline auto xcsf_scheme_nz_iterator<scheme>::update_current_index() const -> index_type&
     {
         for(std::size_t d = 0; d < m_coord_index.size(); ++d)
         {
             m_current_index[d] = *m_coord_index[d];
         }
         return m_current_index;
-    }
-
-    template <class Scheme, bool is_const>
-    inline auto xcsf_scheme_nz_iterator<Scheme, is_const>::value() const -> reference
-    {
-        std::ptrdiff_t dst = std::distance(p_scheme->coordinate().back().begin(), m_coord_index.back());
-        return *(p_scheme->storage().begin() + dst);
     }
 }
 
