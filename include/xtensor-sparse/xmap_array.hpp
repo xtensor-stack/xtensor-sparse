@@ -59,6 +59,7 @@ namespace xt
 
         using self_type = xmap_array<T>;
         using base_type = xsparse_container<self_type>;
+        using semantic_base = xcontainer_semantic<self_type>;
         using storage_type = typename base_type::storage_type;
         using index_type = typename base_type::index_type;
         using value_type = typename base_type::value_type;
@@ -80,6 +81,12 @@ namespace xt
 
         xmap_array(xmap_array&&) = default;
         xmap_array& operator=(xmap_array&&) = default;
+
+        template <class E>
+        xmap_array(const xexpression<E>& e);
+
+        template <class E>
+        self_type& operator=(const xexpression<E>& e);
     };
 
     /*****************************
@@ -97,6 +104,20 @@ namespace xt
         : base_type()
     {
         base_type::resize(shape);
+    }
+
+    template <class T>
+    template <class E>
+    inline xmap_array<T>::xmap_array(const xexpression<E>& e)
+    {
+        semantic_base::assign(e);
+    }
+
+    template <class T>
+    template <class E>
+    inline auto xmap_array<T>::operator=(const xexpression<E>& e) -> self_type&
+    {
+        return semantic_base::operator=(e);
     }
 }
 

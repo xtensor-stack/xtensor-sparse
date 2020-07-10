@@ -17,12 +17,15 @@ namespace xt
         using storage_type = ST;
         using index_type = typename storage_type::key_type;
         using value_type = typename storage_type::mapped_type;
+        using refernece = value_type&;
         using const_reference = const value_type&;
         using pointer = value_type*;
+        using const_pointer = const value_type*;
 
         const storage_type& storage() const;
 
         pointer find_element(const index_type& index);
+        const_pointer find_element(const index_type& index) const;
         void insert_element(const index_type& index, const_reference value);
         void remove_element(const index_type& index);
 
@@ -32,6 +35,8 @@ namespace xt
                             const shape_type& new_shape);
 
     private:
+
+        const_pointer find_element_impl(const index_type& index) const;
 
         storage_type m_storage;
     };
@@ -49,8 +54,13 @@ namespace xt
     template <class ST>
     inline auto xmap_scheme<ST>::find_element(const index_type& index) -> pointer
     {
-        auto it = m_storage.find(index);
-        return it == m_storage.end() ? nullptr : &(it->second);
+        return const_cast<pointer>(find_element_impl(index));
+    }
+
+    template <class ST>
+    inline auto xmap_scheme<ST>::find_element(const index_type& index) const -> const_pointer
+    {
+        return find_element_impl(index);
     }
 
     template <class ST>
@@ -80,6 +90,13 @@ namespace xt
         }
         using std::swap;
         swap(m_storage, new_storage);
+    }
+
+    template <class ST>
+    inline auto xmap_scheme<ST>::find_element_impl(const index_type& index) const -> const_pointer
+    {
+        auto it = m_storage.find(index);
+        return it == m_storage.end() ? nullptr : &(it->second);
     }
 }
 

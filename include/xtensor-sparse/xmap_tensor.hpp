@@ -60,6 +60,7 @@ namespace xt
 
         using self_type = xmap_tensor<T, N>;
         using base_type = xsparse_container<self_type>;
+        using semantic_base = xcontainer_semantic<self_type>;
         using storage_type = typename base_type::storage_type;
         using index_type = typename base_type::index_type;
         using value_type = typename base_type::value_type;
@@ -81,6 +82,12 @@ namespace xt
 
         xmap_tensor(xmap_tensor&&) = default;
         xmap_tensor& operator=(xmap_tensor&&) = default;
+
+        template <class E>
+        xmap_tensor(const xexpression<E>& e);
+
+        template <class E>
+        self_type& operator=(const xexpression<E>& e);
     };
 
     /******************************
@@ -98,6 +105,20 @@ namespace xt
         : base_type()
     {
         base_type::resize(shape);
+    }
+
+    template <class T, std::size_t N>
+    template <class E>
+    inline xmap_tensor<T, N>::xmap_tensor(const xexpression<E>& e)
+    {
+        semantic_base::assign(e);
+    }
+
+    template <class T, size_t N>
+    template <class E>
+    inline auto xmap_tensor<T, N>::operator=(const xexpression<E>& e) -> self_type&
+    {
+        return semantic_base::operator=(e);
     }
 }
 
