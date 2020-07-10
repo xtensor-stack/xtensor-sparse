@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include <xtensor/xiterator.hpp>
 #include <xtensor/xstorage.hpp>
 
 #include "xcoo_scheme.hpp"
@@ -40,6 +41,15 @@ namespace xt
         using reference = xsparse_reference<scheme_type>;
     };
     
+    template <class T>
+    struct xiterable_inner_types<xcoo_array<T>>
+    {
+        using array_type = xcoo_array<T>;
+        using inner_shape_type = typename xcontainer_inner_types<array_type>::shape_type;
+        using const_stepper = xindexed_stepper<array_type, true>;
+        using stepper = xindexed_stepper<array_type, false>;
+    };
+
     template <class T>
     class xcoo_array : public xsparse_container<xcoo_array<T>> 
     {

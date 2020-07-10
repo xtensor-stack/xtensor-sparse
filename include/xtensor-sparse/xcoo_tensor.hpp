@@ -1,6 +1,8 @@
 #ifndef XSPARSE_COO_TENSOR_HPP
 #define XSPARSE_COO_TENSOR_HPP
 
+#include <xtensor/xiterator.hpp>
+
 #include "xcoo_scheme.hpp"
 #include "xsparse_container.hpp"
 
@@ -36,6 +38,15 @@ namespace xt
         using reference = xsparse_reference<scheme_type>;
     };
     
+    template <class T, std::size_t N>
+    struct xiterable_inner_types<xcoo_tensor<T, N>>
+    {
+        using array_type = xcoo_tensor<T, N>;
+        using inner_shape_type = typename xcontainer_inner_types<array_type>::shape_type;
+        using const_stepper = xindexed_stepper<array_type, true>;
+        using stepper = xindexed_stepper<array_type, false>;
+    };
+
     template <class T, std::size_t N>
     class xcoo_tensor : public xsparse_container<xcoo_tensor<T, N>> 
     {

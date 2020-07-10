@@ -2,6 +2,7 @@
 #define XSPARSE_CSF_ARRAY_HPP
 
 #include <vector>
+#include <xtensor/xiterator.hpp>
 #include <xtensor/xstorage.hpp>
 
 #include "xcsf_scheme.hpp"
@@ -40,6 +41,15 @@ namespace xt
         using reference = xsparse_reference<scheme_type>;
     };
     
+    template <class T>
+    struct xiterable_inner_types<xcsf_array<T>>
+    {
+        using array_type = xcsf_array<T>;
+        using inner_shape_type = typename xcontainer_inner_types<array_type>::shape_type;
+        using const_stepper = xindexed_stepper<array_type, true>;
+        using stepper = xindexed_stepper<array_type, false>;
+    };
+
     template <class T>
     class xcsf_array : public xsparse_container<xcsf_array<T>> 
     {

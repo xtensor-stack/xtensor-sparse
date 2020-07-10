@@ -2,6 +2,7 @@
 #define XSPARSE_XSPARSE_CONTAINER_HPP
 
 #include <xtensor/xaccessible.hpp>
+#include <xtensor/xiterable.hpp>
 #include <xtensor/xstrides.hpp>
 
 #include "xsparse_reference.hpp"
@@ -13,7 +14,8 @@ namespace xt
      *********************/
 
     template <class D>
-    class xsparse_container: private xaccessible<D>
+    class xsparse_container: public xiterable<D>,
+                             private xaccessible<D>
     {
     public:
 
