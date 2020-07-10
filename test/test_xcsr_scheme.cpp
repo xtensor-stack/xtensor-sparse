@@ -87,7 +87,7 @@ namespace xt
         scheme.insert_element({1, 1}, 3.1);
         scheme.insert_element({3, 8}, 6.7);
 
-        auto it = scheme.begin();
+        auto it = scheme.nz_begin();
         std::array<std::size_t, 2> expected{{0, 4}};
         EXPECT_EQ(it.index(), expected);
         EXPECT_EQ(*it, 2.5);
@@ -110,7 +110,7 @@ namespace xt
         svector<std::size_t> new_shape{20, 5};
 
         scheme.update_entries(old_strides, new_strides, new_shape);
-        it = scheme.begin();
+        it = scheme.nz_begin();
         expected = {{0, 4}};
         EXPECT_EQ(it.index(), expected);
         EXPECT_EQ(*it, 2.5);
@@ -128,7 +128,7 @@ namespace xt
         EXPECT_EQ(*it, 6.7);
         ++it;
 
-        it = scheme.begin();
+        it = scheme.nz_begin();
         it += 2;
         expected = {{5, 0}};
         EXPECT_EQ(it.index(), expected);
@@ -144,7 +144,7 @@ namespace xt
         scheme.insert_element({1, 1}, 3.1);
         scheme.insert_element({3, 8}, 6.7);
 
-        auto it = scheme.end();
+        auto it = scheme.nz_end();
         --it;
         std::array<std::size_t, 2> expected{{3, 8}};
         EXPECT_EQ(it.index(), expected);
@@ -168,7 +168,7 @@ namespace xt
         svector<std::size_t> new_shape{20, 5};
 
         scheme.update_entries(old_strides, new_strides, new_shape);
-        it = scheme.end();
+        it = scheme.nz_end();
         --it;
         expected = {{7, 3}};
         EXPECT_EQ(it.index(), expected);
@@ -187,7 +187,7 @@ namespace xt
         EXPECT_EQ(*it, 2.5);
         --it;
 
-        it = scheme.end();
+        it = scheme.nz_end();
         it -= 3;
         expected = {{2, 1}};
         EXPECT_EQ(it.index(), expected);
