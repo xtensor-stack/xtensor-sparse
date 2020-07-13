@@ -47,6 +47,9 @@ namespace xt
         static constexpr layout_type static_layout = layout_type::row_major;
         static constexpr bool contiguous_layout = false;
 
+        using nz_iterator = typename scheme_type::nz_iterator;
+        using const_nz_iterator = typename scheme_type::const_nz_iterator;
+
         size_type size() const noexcept;
         size_type dimension() const noexcept;
         const inner_shape_type& shape() const noexcept;
@@ -93,6 +96,13 @@ namespace xt
 
         inline layout_type layout() const noexcept;
         inline bool is_contiguous() const noexcept;
+
+        nz_iterator nz_begin();
+        nz_iterator nz_end();
+        const_nz_iterator nz_begin() const;
+        const_nz_iterator nz_end() const;
+        const_nz_iterator nz_cbegin() const;
+        const_nz_iterator nz_cend() const;
 
     protected:
 
@@ -288,6 +298,42 @@ namespace xt
     inline bool xsparse_container<D>::is_contiguous() const noexcept
     {
         return false;
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_begin() -> nz_iterator
+    {
+        return m_scheme.nz_begin();
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_end() -> nz_iterator
+    {
+        return m_scheme.nz_end();
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_begin() const -> const_nz_iterator
+    {
+        return m_scheme.nz_begin();
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_end() const -> const_nz_iterator
+    {
+        return m_scheme.nz_end();
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_cbegin() const -> const_nz_iterator
+    {
+        return m_scheme.nz_cbegin();
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::nz_cend() const -> const_nz_iterator
+    {
+        return m_scheme.nz_cend();
     }
 
     template <class D>
