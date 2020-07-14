@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include <xtensor-sparse/xcoo_array.hpp>
+#include <xtensor-sparse/xsparse_array.hpp>
 
 namespace xt
 {

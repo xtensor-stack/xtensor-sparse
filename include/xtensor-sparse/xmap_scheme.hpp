@@ -56,6 +56,23 @@ namespace xt
         storage_type m_storage;
     };
 
+    /***********************
+     * xdefault_map_scheme *
+     ***********************/
+
+    template <class T>
+    struct xdefault_map_scheme
+    {
+        using value_type = T;
+        using size_type = std::size_t;
+        using index_type = svector<size_type>;
+        using storage_type = std::map<index_type, value_type>;
+        using type = xmap_scheme<storage_type>;
+    };
+
+    template <class T>
+    using xdefault_map_scheme_t = typename xdefault_map_scheme<T>::type;
+
     /***************************
      * xmap_scheme_nz_iterator *
      ***************************/

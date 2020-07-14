@@ -71,6 +71,26 @@ namespace xt
         friend class xcsf_scheme_nz_iterator<const self_type>;
     };
 
+    /***********************
+     * xdefault_csf_scheme *
+     ***********************/
+
+    template <class T>
+    struct xdefault_csf_scheme
+    {
+        using value_type = T;
+        using size_type = std::size_t;
+        using index_type = svector<size_type>;
+        using storage_type = std::vector<value_type>;
+        using type = xcsf_scheme<std::vector<svector<size_type>>,
+                                 std::vector<svector<size_type>>,
+                                 storage_type,
+                                  index_type>;
+    };
+
+    template <class T>
+    using xdefault_csf_scheme_t = typename xdefault_csf_scheme<T>::type;
+
     /***************************************
      * xcsf_scheme_nz_iterator declaration *
      ***************************************/
