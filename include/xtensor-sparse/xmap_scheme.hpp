@@ -60,18 +60,18 @@ namespace xt
      * xdefault_map_scheme *
      ***********************/
 
-    template <class T>
+    template <class T, class I>
     struct xdefault_map_scheme
     {
+        using index_type = I;
         using value_type = T;
-        using size_type = std::size_t;
-        using index_type = svector<size_type>;
+        using size_type = typename index_type::value_type;
         using storage_type = std::map<index_type, value_type>;
         using type = xmap_scheme<storage_type>;
     };
 
-    template <class T>
-    using xdefault_map_scheme_t = typename xdefault_map_scheme<T>::type;
+    template <class T, class I>
+    using xdefault_map_scheme_t = typename xdefault_map_scheme<T, I>::type;
 
     /***************************
      * xmap_scheme_nz_iterator *

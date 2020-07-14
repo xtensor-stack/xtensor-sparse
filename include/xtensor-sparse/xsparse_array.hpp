@@ -91,13 +91,13 @@ namespace xt
      *****************************/
 
     template <class T>
-    using xcoo_array = xsparse_array<T, xdefault_coo_scheme_t<T>>;
+    using xcoo_array = xsparse_array<T, xdefault_coo_scheme_t<T, svector<std::size_t>>>;
     
     template <class T>
-    using xcsf_array = xsparse_array<T, xdefault_csf_scheme_t<T>>;
+    using xcsf_array = xsparse_array<T, xdefault_csf_scheme_t<T, svector<std::size_t>>>;
 
     template <class T>
-    using xmap_array = xsparse_array<T, xdefault_map_scheme_t<T>>;
+    using xmap_array = xsparse_array<T, xdefault_map_scheme_t<T, svector<std::size_t>>>;
 
     /********************************
      * xsparse_array implementation *

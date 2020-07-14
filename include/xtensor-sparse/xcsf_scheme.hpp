@@ -75,21 +75,21 @@ namespace xt
      * xdefault_csf_scheme *
      ***********************/
 
-    template <class T>
+    template <class T, class I>
     struct xdefault_csf_scheme
     {
+        using index_type = I;
         using value_type = T;
-        using size_type = std::size_t;
-        using index_type = svector<size_type>;
+        using size_type = typename index_type::value_type;
         using storage_type = std::vector<value_type>;
         using type = xcsf_scheme<std::vector<svector<size_type>>,
                                  std::vector<svector<size_type>>,
                                  storage_type,
-                                  index_type>;
+                                 index_type>;
     };
 
-    template <class T>
-    using xdefault_csf_scheme_t = typename xdefault_csf_scheme<T>::type;
+    template <class T, class I>
+    using xdefault_csf_scheme_t = typename xdefault_csf_scheme<T, I>::type;
 
     /***************************************
      * xcsf_scheme_nz_iterator declaration *

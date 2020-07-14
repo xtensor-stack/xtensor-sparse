@@ -76,12 +76,12 @@ namespace xt
      * xdefault_coo_scheme *
      ***********************/
 
-    template <class T>
+    template <class T, class I>
     struct xdefault_coo_scheme
     {
+        using index_type = I;
         using value_type = T;
-        using size_type = std::size_t;
-        using index_type = svector<size_type>;
+        using size_type = typename index_type::value_type;
         using storage_type = std::vector<value_type>;
         using type = xcoo_scheme<std::array<size_type, 2>,
                                  std::vector<index_type>,
@@ -89,8 +89,8 @@ namespace xt
                                  index_type>;
     };
 
-    template <class T>
-    using xdefault_coo_scheme_t = typename xdefault_coo_scheme<T>::type;
+    template <class T, class I>
+    using xdefault_coo_scheme_t = typename xdefault_coo_scheme<T, I>::type;
         
     /***************************
      * xcoo_scheme_nz_iterator *
