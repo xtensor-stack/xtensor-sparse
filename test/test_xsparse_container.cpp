@@ -1,8 +1,6 @@
 #include "gtest/gtest.h"
 #include <vector>
-#include <xtensor-sparse/xcoo_array.hpp>
-#include <xtensor-sparse/xcoo_tensor.hpp>
-#include <xtensor-sparse/xcsf_array.hpp>
+#include <xtensor-sparse/xsparse_array.hpp>
 
 namespace xt
 {

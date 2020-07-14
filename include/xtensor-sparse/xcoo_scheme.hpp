@@ -2,6 +2,8 @@
 #define XSPARSE_COO_SCHEME_HPP
 
 #include <algorithm>
+#include <array>
+#include <vector>
 
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xstrides.hpp>
@@ -70,6 +72,26 @@ namespace xt
         friend class xcoo_scheme_nz_iterator<const self_type>;
     };
 
+    /***********************
+     * xdefault_coo_scheme *
+     ***********************/
+
+    template <class T, class I>
+    struct xdefault_coo_scheme
+    {
+        using index_type = I;
+        using value_type = T;
+        using size_type = typename index_type::value_type;
+        using storage_type = std::vector<value_type>;
+        using type = xcoo_scheme<std::array<size_type, 2>,
+                                 std::vector<index_type>,
+                                 storage_type,
+                                 index_type>;
+    };
+
+    template <class T, class I>
+    using xdefault_coo_scheme_t = typename xdefault_coo_scheme<T, I>::type;
+        
     /***************************
      * xcoo_scheme_nz_iterator *
      ***************************/
