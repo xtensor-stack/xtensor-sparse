@@ -137,6 +137,7 @@ include_directories(${GTEST_INCLUDE_DIRS} SYSTEM)
 set(XTENSOR_SPARSE_TESTS
     main.cpp
     test_xsparse_container.cpp
+    test_xsparse_function.cpp
     test_xcoo_scheme.cpp
     test_xcoo_array.cpp
     test_xcoo_tensor.cpp
