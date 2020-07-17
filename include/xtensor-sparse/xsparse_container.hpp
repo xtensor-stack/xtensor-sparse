@@ -5,6 +5,8 @@
 #include <xtensor/xiterable.hpp>
 #include <xtensor/xstrides.hpp>
 
+#include "xsparse_assign.hpp"
+#include "xsparse_function.hpp"
 #include "xsparse_reference.hpp"
 
 namespace xt
@@ -34,6 +36,9 @@ namespace xt
         using difference_type = typename inner_types::difference_type;
         using bool_load_type = xt::bool_load_type<value_type>;
         using temporary_type = typename inner_types::temporary_type;
+
+        using expression_tag = xsparse_expression_tag;
+        using assign_tag = extension::xsparse_assign_tag;
 
         using shape_type = typename inner_types::shape_type;
         using inner_shape_type = typename inner_types::inner_shape_type;
