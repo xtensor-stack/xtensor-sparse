@@ -88,7 +88,7 @@ namespace xt
     {
     public:
 
-        using schmee_type = S;
+        using scheme_type = S;
     };
 
     using coo_iterator_test_types = ::testing::Types<xcoo_scheme_type, const xcoo_scheme_type>;

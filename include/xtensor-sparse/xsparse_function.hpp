@@ -14,13 +14,21 @@ namespace xt
         {
             namespace mpl = xtl::mpl;
             
+            // Because of shitty VS2015 bug:
+            // pack expansions cannot be used as arguments to non-packed parameters in alias templates
             template <class... CT>
-            using assign_tag_list = mpl::vector<get_assign_tag_t<CT>...>;
+            struct assign_tag_list
+            {
+                using type = mpl::vector<get_assign_tag_t<CT>...>;
+            };
+
+            template <class... CT>
+            using assign_tag_list_t = typename assign_tag_list<CT...>::type;
 
             template <class... CT>
             struct get_default_assign_tag
             {
-                using tag_list = assign_tag_list<CT...>;
+                using tag_list = assign_tag_list_t<CT...>;
                 using type = std::conditional_t
                              <
                                     mpl::contains<tag_list, xdense_assign_tag>::value,
@@ -38,7 +46,7 @@ namespace xt
             template <class... CT>
             struct get_multiply_assign_tag
             {
-                using tag_list = assign_tag_list<CT...>;
+                using tag_list = assign_tag_list_t<CT...>;
                 using type = std::conditional_t<
                                     mpl::contains<tag_list, xsparse_assign_tag>::value,
                                     xsparse_assign_tag,
