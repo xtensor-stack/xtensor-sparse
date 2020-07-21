@@ -32,12 +32,19 @@ namespace xt
 
     TEST(xsparse_function, iterator)
     {
-        xcoo_array<double> A;
-        xcoo_array<double> C;
+        std::vector<std::size_t> shape{2, 5};
+        xcoo_array<double> A(shape);
+        xcoo_array<double> C(shape);
         xarray<double> B;
 
+        A(0, 2) = 2.5;
+        A(1, 2) = 1.1;
+        C(1, 2) = 3.2;
         auto expr1 = A*C;
-        expr1.nz_begin();
+        auto it = expr1.nz_begin();
+        std::cout << *it << "\n";
+        ++it;
+        std::cout << *it << "\n";
         // auto it = xfunction_nz_iterator(expr1)
     }
 }
