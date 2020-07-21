@@ -29,4 +29,15 @@ namespace xt
         auto expr6 = (A+B)*B;
         EXPECT_TRUE((std::is_same<decltype(expr6)::assign_tag, extension::xdense_assign_tag>::value));
     }
+
+    TEST(xsparse_function, iterator)
+    {
+        xcoo_array<double> A;
+        xcoo_array<double> C;
+        xarray<double> B;
+
+        auto expr1 = A*C;
+        expr1.nz_begin();
+        // auto it = xfunction_nz_iterator(expr1)
+    }
 }
