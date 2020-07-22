@@ -30,21 +30,28 @@ namespace xt
         EXPECT_TRUE((std::is_same<decltype(expr6)::assign_tag, extension::xdense_assign_tag>::value));
     }
 
-    TEST(xsparse_function, iterator)
+    TEST(xsparse_function, nz_iterator)
     {
         std::vector<std::size_t> shape{2, 5};
         xcoo_array<double> A(shape);
-        xcoo_array<double> C(shape);
-        xarray<double> B;
+        xcsf_array<double> B(shape);
 
-        A(0, 2) = 2.5;
-        A(1, 2) = 1.1;
-        C(1, 2) = 3.2;
-        auto expr1 = A*C;
-        auto it = expr1.nz_begin();
-        std::cout << *it << "\n";
-        ++it;
-        std::cout << *it << "\n";
-        // auto it = xfunction_nz_iterator(expr1)
+        A(0, 2) = 2.1;
+        A(1, 2) = 1.2;
+        B(1, 2) = 4.2;
+
+        auto expr1 = A*B + B;
+
+        auto it1 = expr1.nz_begin();
+        EXPECT_EQ(*it1, 0.);
+        ++it1;
+        EXPECT_EQ(*it1, 9.24);
+
+        auto expr2 = A*B + A;
+        auto it2 = expr2.nz_begin();
+        EXPECT_EQ(*it2, 2.1);
+        ++it2;
+        EXPECT_EQ(*it2, 6.24);
+
     }
 }
