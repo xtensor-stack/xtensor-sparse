@@ -42,10 +42,13 @@ namespace xt
         using index_type = promote_shape_t<typename std::decay_t<CT>::shape_type...>;
 
         template <class... It>
-        xfunction_nz_iterator(const xfunction_type* func, It&&... it);
+        xfunction_nz_iterator(const xfunction_type* func, bool use_min, std::tuple<It...> it, std::tuple<It...> sentinel);
 
         self_type& operator++();
-        // self_type& operator--();
+        self_type& operator--();
+
+        // self_type& operator+=(difference_type n);
+        // self_type& operator-=(difference_type n);
 
         reference operator*() const;
         const index_type& index() const;
@@ -60,9 +63,14 @@ namespace xt
         template <std::size_t... Is>
         reference apply(std::index_sequence<Is...>) const;
 
+        void update_current_index_with_min();
+        void update_current_index_with_max();
+
         const xfunction_type* p_f;
-        index_type current_index;
+        index_type m_current_index;
+        std::array<bool, sizeof...(CT)> m_is_valid;
         std::tuple<typename std::decay_t<CT>::const_nz_iterator...> m_nz_iterators;
+        std::tuple<typename std::decay_t<CT>::const_nz_iterator...> m_nz_sentinels;
         // Contains a pointer to the iterator in m_nz_iterators or nullptr
         std::tuple<typename std::decay_t<CT>::const_nz_iterator*...> m_nz_current_iterators;
     };
@@ -147,11 +155,13 @@ namespace xt
 
             const_nz_iterator nz_begin() const;
             const_nz_iterator nz_cbegin() const;
+            const_nz_iterator nz_end() const;
+            const_nz_iterator nz_cend() const;
 
         private:
 
-            template<std::size_t... I>
-            const_nz_iterator build_nz_iterator(std::index_sequence<I...>) const noexcept;
+            template<class Func, class Func_s, std::size_t... I>
+            const_nz_iterator build_nz_iterator(Func&& f_it, Func_s&& f_sentinel, bool end, std::index_sequence<I...>) const noexcept;
 
         };
 
@@ -176,38 +186,60 @@ namespace xt
 
     template <class F, class... CT>
     template <class... It>
-    inline xfunction_nz_iterator<F, CT...>::xfunction_nz_iterator(const xfunction_type* func, It&&... it)
+    inline xfunction_nz_iterator<F, CT...>::xfunction_nz_iterator(const xfunction_type* func, bool end, std::tuple<It...> it, std::tuple<It...> sentinel)
         : p_f(func),
-          m_nz_iterators(std::forward<It>(it)...),
+          m_nz_iterators(it),
+          m_nz_sentinels(sentinel),
           m_nz_current_iterators(std::make_tuple(static_cast<typename std::decay_t<CT>::const_nz_iterator*>(nullptr)...))
     {
-        auto min = [](const auto& init, const auto& iter)
+        m_is_valid.fill(true);
+        if (end)
         {
-            return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
-                init :
-                iter.index();
-        };
-        current_index = xt::accumulate(min, index_type(p_f->dimension(), std::size_t(-1)), m_nz_iterators);
-
-        auto ft = [this](auto& it){return (it.index() == current_index)? &it: nullptr;};
-        transform(ft, m_nz_iterators, m_nz_current_iterators);
+            auto ft1 = [](const auto /*i*/, auto& it){return &it;};
+            transform(ft1, m_nz_iterators, m_nz_current_iterators);
+            m_current_index = p_f->shape();
+        }
+        else
+        {
+            update_current_index_with_min();
+        
+            auto ft = [this](const auto /*i*/, auto& it){return (it.index() == m_current_index)? &it: nullptr;};
+            transform(ft, m_nz_iterators, m_nz_current_iterators);
+        }
     }
 
     template <class F, class... CT>
     inline auto xfunction_nz_iterator<F, CT...>::operator++() -> self_type&
     {
-        auto ft1 = [this](auto& it){if (it.index() == current_index) ++it; return nullptr;};
+        auto ft1 = [this](const auto, auto& it){if (it.index() == m_current_index) ++it; return nullptr;};
         transform(ft1, m_nz_iterators, m_nz_current_iterators);
 
-        auto min = [](const auto& init, const auto& iter)
-        {
-            return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
-                init :
-                iter.index();
-        };
-        current_index = xt::accumulate(min, index_type(p_f->dimension(), std::size_t(-1)), m_nz_iterators);
+        update_current_index_with_min();
 
-        auto ft2 = [this](auto& it){return (it.index() == current_index)? &it: nullptr;};
+        auto ft2 = [this](const auto i, auto& it){return (m_is_valid[i] && it.index() == m_current_index)? &it: nullptr;};
+        transform(ft2, m_nz_iterators, m_nz_current_iterators);
+        return *this;
+    }
+
+    template <class F, class... CT>
+    inline auto xfunction_nz_iterator<F, CT...>::operator--() -> self_type&
+    {
+        auto f = [this](const auto i, auto& it, auto& sentinel, auto& p_it){
+            if (it == sentinel)
+            {
+                m_is_valid[i] = false;
+            }
+            else if (p_it != nullptr && it != sentinel)
+            {
+                --it;
+            }
+            p_it = nullptr;
+        };
+        update_it(f, m_nz_iterators, m_nz_sentinels, m_nz_current_iterators);
+
+        update_current_index_with_max();
+
+        auto ft2 = [this](const auto i, auto& it){return (m_is_valid[i] && it.index() == m_current_index)? &it: nullptr;};
         transform(ft2, m_nz_iterators, m_nz_current_iterators);
         return *this;
     }
@@ -221,7 +253,7 @@ namespace xt
     template <class F, class... CT>
     inline auto xfunction_nz_iterator<F, CT...>::index() const -> const index_type&
     {
-        return current_index;
+        return m_current_index;
     }
 
     template <class F, class... CT>
@@ -236,6 +268,38 @@ namespace xt
     inline auto xfunction_nz_iterator<F, CT...>::apply(std::index_sequence<Is...>) const -> reference
     {
         return (p_f->functor())(get_value(std::get<Is>(m_nz_current_iterators))...);
+    }
+
+    template <class F, class... CT>
+    inline void xfunction_nz_iterator<F, CT...>::update_current_index_with_min()
+    {
+        auto min = [](const auto& init, const auto& iter, const auto& is_valid)
+        {
+            if (is_valid)
+            {
+                return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
+                    init :
+                    iter.index();
+            }
+            return init;
+        };
+        m_current_index = xt::accumulate(min, index_type(p_f->dimension(), std::size_t(-1)), m_nz_iterators, m_is_valid);
+    }
+
+    template <class F, class... CT>
+    inline void xfunction_nz_iterator<F, CT...>::update_current_index_with_max()
+    {
+        auto max = [](const auto& init, const auto& iter, const auto& is_valid)
+        {
+            if (is_valid)
+            {
+                return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
+                    iter.index() :
+                    init;
+            }
+            return init;
+        };
+        m_current_index = xt::accumulate(max, index_type(p_f->dimension(), std::numeric_limits<std::size_t>::min()), m_nz_iterators, m_is_valid);
     }
 
     /****************************************
@@ -253,15 +317,33 @@ namespace xt
         template<class F, class... CT>
         inline auto xfunction_sparse_base<F, CT...>::nz_cbegin() const -> const_nz_iterator
         {
-            return build_nz_iterator(std::make_index_sequence<sizeof...(CT)>());
+            auto f_it = [](auto& e){return e.nz_begin();};
+            auto f_sentinel = [](auto& e){return e.nz_end();};
+            return build_nz_iterator(f_it, f_sentinel, false, std::make_index_sequence<sizeof...(CT)>());
         }
 
         template<class F, class... CT>
-        template<std::size_t... I>
-        inline auto xfunction_sparse_base<F, CT...>::build_nz_iterator(std::index_sequence<I...>) const noexcept -> const_nz_iterator
+        inline auto xfunction_sparse_base<F, CT...>::nz_end() const -> const_nz_iterator
+        {
+            return nz_cend();
+        }
+
+        template<class F, class... CT>
+        inline auto xfunction_sparse_base<F, CT...>::nz_cend() const -> const_nz_iterator
+        {
+            auto f_it = [](auto& e){return e.nz_end();};
+            auto f_sentinel = [](auto& e){return e.nz_begin();};
+            return build_nz_iterator(f_it, f_sentinel, true, std::make_index_sequence<sizeof...(CT)>());
+        }
+
+        template<class F, class... CT>
+        template<class Func, class Func_s, std::size_t... I>
+        inline auto xfunction_sparse_base<F, CT...>::build_nz_iterator(Func&& f_it, Func_s&& f_sentinel, bool end, std::index_sequence<I...>) const noexcept -> const_nz_iterator
         {
             auto& args = this->derived_cast().arguments();
-            return const_nz_iterator(&(this->derived_cast()), std::get<I>(args).nz_cbegin()...);
+            return const_nz_iterator(&(this->derived_cast()), end, 
+                                     std::make_tuple(f_it(std::get<I>(args))...),
+                                     std::make_tuple(f_sentinel(std::get<I>(args))...));
         }
 
         template <class F, class... CT>

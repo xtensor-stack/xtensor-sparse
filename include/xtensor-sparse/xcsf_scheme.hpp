@@ -177,6 +177,14 @@ namespace xt
         xcsf_scheme* p_scheme;
     };
 
+    template <class scheme>
+    bool operator==(const xcsf_scheme_nz_iterator<scheme>& it1,
+                    const xcsf_scheme_nz_iterator<scheme>& it2);
+
+    template <class scheme>
+    bool operator<(const xcsf_scheme_nz_iterator<scheme>& it1,
+                   const xcsf_scheme_nz_iterator<scheme>& it2);
+
     /******************************
      * xcsf_scheme implementation *
      ******************************/
@@ -600,6 +608,20 @@ namespace xt
         }
         return m_current_index;
     }
+
+    template <class scheme>
+    inline bool operator==(const xcsf_scheme_nz_iterator<scheme>& it1,
+                           const xcsf_scheme_nz_iterator<scheme>& it2)
+    {
+        return it1.equal(it2);
+    }
+
+    template <class scheme>
+    inline bool operator<(const xcsf_scheme_nz_iterator<scheme>& it1,
+                          const xcsf_scheme_nz_iterator<scheme>& it2)
+    {
+        return it1.less_than(it2);
+    }    
 }
 
 #endif
