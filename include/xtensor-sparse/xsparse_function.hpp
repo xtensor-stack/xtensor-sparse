@@ -47,11 +47,15 @@ namespace xt
         self_type& operator++();
         self_type& operator--();
 
-        // self_type& operator+=(difference_type n);
-        // self_type& operator-=(difference_type n);
+        self_type& operator+=(difference_type n);
+        self_type& operator-=(difference_type n);
 
         reference operator*() const;
+        pointer operator->() const;
         const index_type& index() const;
+
+        bool equal(const self_type& rhs) const;
+        bool less_than(const self_type& rhs) const;
 
     private:
 
@@ -74,6 +78,14 @@ namespace xt
         // Contains a pointer to the iterator in m_nz_iterators or nullptr
         std::tuple<typename std::decay_t<CT>::const_nz_iterator*...> m_nz_current_iterators;
     };
+
+    template <class F, class... CT>
+    bool operator==(const xfunction_nz_iterator<F, CT...>& it1,
+                    const xfunction_nz_iterator<F, CT...>& it2);
+
+    template <class F, class... CT>
+    bool operator<(const xfunction_nz_iterator<F, CT...>& it1,
+                   const xfunction_nz_iterator<F, CT...>& it2);
 
     namespace extension
     {
@@ -245,9 +257,48 @@ namespace xt
     }
 
     template <class F, class... CT>
+    inline auto xfunction_nz_iterator<F, CT...>::operator+=(difference_type n) -> self_type&
+    {
+        for (difference_type i = 0; i < n; ++i)
+        {
+            ++(*this);
+        }
+        return *this;
+    }
+
+    template <class F, class... CT>
+    inline auto xfunction_nz_iterator<F, CT...>::operator-=(difference_type n) -> self_type&
+    {
+        for (difference_type i = 0; i < n; ++i)
+        {
+            --(*this);
+        }
+        return *this;
+    }
+
+    template <class F, class... CT>
     inline auto xfunction_nz_iterator<F, CT...>::operator*() const -> reference
     {
         return apply(std::make_index_sequence<sizeof...(CT)>{});
+    }
+
+    template <class F, class... CT>
+    inline auto xfunction_nz_iterator<F, CT...>::operator->() const -> pointer
+    {
+        return &(this->operator*());
+    }
+
+    template <class F, class... CT>
+    inline bool xfunction_nz_iterator<F, CT...>::equal(const self_type& rhs) const
+    {
+        return m_nz_iterators == rhs.m_nz_iterators && m_nz_current_iterators == rhs.m_nz_current_iterators;
+    }
+
+    template <class F, class... CT>
+    inline bool xfunction_nz_iterator<F, CT...>::less_than(const self_type& rhs) const
+    {
+        return m_nz_iterators == rhs.m_nz_iterators && m_nz_current_iterators == rhs.m_nz_current_iterators
+         && m_current_index < rhs.m_current_index;
     }
 
     template <class F, class... CT>
@@ -301,6 +352,20 @@ namespace xt
         };
         m_current_index = xt::accumulate(max, index_type(p_f->dimension(), std::numeric_limits<std::size_t>::min()), m_nz_iterators, m_is_valid);
     }
+
+    template <class F, class... CT>
+    inline bool operator==(const xfunction_nz_iterator<F, CT...>& it1,
+                           const xfunction_nz_iterator<F, CT...>& it2)
+    {
+        return it1.equal(it2);
+    }
+
+    template <class F, class... CT>
+    inline bool operator<(const xfunction_nz_iterator<F, CT...>& it1,
+                          const xfunction_nz_iterator<F, CT...>& it2)
+    {
+        return it1.less_than(it2);
+    }   
 
     /****************************************
     *  xfunction_sparse_base implementation *
