@@ -22,7 +22,7 @@ namespace xt
     public:
 
         using derived_type = D;
-        
+
         using inner_types = xcontainer_inner_types<D>;
         using scheme_type = typename inner_types::scheme_type;
         using index_type = typename inner_types::index_type;
@@ -109,6 +109,8 @@ namespace xt
         const_nz_iterator nz_cbegin() const;
         const_nz_iterator nz_cend() const;
 
+        static const value_type ZERO;
+
     protected:
 
         xsparse_container() = default;
@@ -141,8 +143,6 @@ namespace xt
         derived_type& derived_cast() & noexcept;
         const derived_type& derived_cast() const & noexcept;
         derived_type derived_cast() && noexcept;
-
-        static const value_type ZERO;
 
         inner_shape_type m_shape;
         strides_type m_strides;
@@ -390,7 +390,7 @@ namespace xt
         {
             XTENSOR_THROW(std::runtime_error, "Cannot reshape with incorrect number of elements. Do you mean to resize?");
         }
-        
+
         std::size_t dim = shape.size();
         auto old_strides = m_strides;
         m_shape = xtl::forward_sequence<shape_type, S>(shape);
