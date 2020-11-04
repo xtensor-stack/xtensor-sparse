@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include <vector>
 #include <xtensor-sparse/xsparse_array.hpp>
+#include <xtensor-sparse/xsparse_tensor.hpp>
 
 namespace xt
 {
@@ -12,9 +13,9 @@ namespace xt
         using scheme_type = S;
     };
 
-    using container_list_types = ::testing::Types<xcoo_array<double>>;
-                                                //   xcoo_tensor<double, 2>,
-                                                //  xcsf_array<double>>;
+    using container_list_types = ::testing::Types<xcoo_array<double>,
+                                                  xcsf_array<double>,
+                                                  xmap_array<double>>;
     TYPED_TEST_SUITE(container_test, container_list_types);
 
     TYPED_TEST(container_test, shaped_constructor)
@@ -95,10 +96,14 @@ namespace xt
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
+        A(1, 0) = 20.;
+
+        EXPECT_EQ(A.dimension(), size_t(2));
 
         B = 2*A;
         EXPECT_EQ(B(0, 0), 6.);
         EXPECT_EQ(B(1, 2), 20.);
+        EXPECT_EQ(B(1, 0), 40.);
 
         EXPECT_EQ(B(0, 2), 0.);
         EXPECT_EQ(B(1, 4), 0.);
