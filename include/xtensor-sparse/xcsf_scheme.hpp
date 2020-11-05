@@ -7,6 +7,9 @@
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xstrides.hpp>
 
+#include <xtensor/xadapt.hpp>
+#include <xtensor/xio.hpp>
+
 namespace xt
 {
     template <class scheme>
@@ -59,7 +62,7 @@ namespace xt
         const_nz_iterator nz_cbegin() const;
         const_nz_iterator nz_cend() const;
 
-    private:        
+    private:
 
         const_pointer find_element_impl(const index_type& index) const;
 
@@ -167,6 +170,8 @@ namespace xt
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
 
+        static const value_type ZERO;
+
     private:
 
         index_type& update_current_index() const;
@@ -191,94 +196,96 @@ namespace xt
 
     namespace detail
     {
-        template <class Pos, class Coord, class Func, class Index>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
+        namespace csf
         {
-            for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
+            template <class Pos, class Coord, class Func, class Index>
+            void for_each_sparse_impl(std::integral_constant<std::size_t, 0>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
             {
-                index[i] = coord[i][p];
-                f(index);
-            }
-        }
-
-        template <class Pos, class Coord, class Func, class Index>
-        void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
-        {
-            for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
-            {
-                index[i] = coord[i][p];
-                if (i == pos.size() - 2)
+                for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
                 {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
+                    index[i] = coord[i][p];
+                    f(index);
+                }
+            }
+
+            template <class Pos, class Coord, class Func, class Index>
+            void for_each_sparse_impl(std::integral_constant<std::size_t, 1>, std::size_t i, std::size_t ielem, const Pos& pos, const Coord& coord, Index& index, Func&& f)
+            {
+                for(std::size_t p = pos[i][ielem]; p<pos[i][ielem + 1]; ++p)
+                {
+                    index[i] = coord[i][p];
+                    if (i == pos.size() - 2)
+                    {
+                        for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
+                    }
+                    else
+                    {
+                        for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
+                    }
+                }
+            }
+
+            template <class Pos, class Coord, class Func>
+            void for_each(const Pos& pos, const Coord& coord, Func&& f)
+            {
+                std::vector<std::size_t> index(pos.size());
+                if (pos.size() == 1)
+                {
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
+                }
+                else if (pos.size() > 1)
+                {
+                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
+                }
+            }
+
+            template <class Pos, class Coord, class Index>
+            std::size_t insert_index(Pos& pos, Coord& coord, const Index& index)
+            {
+                std::size_t ielem = 0;
+                if (pos.size() == 0)
+                {
+                    pos.resize(index.size());
+                    coord.resize(index.size());
+                    for(std::size_t i=0; i<index.size(); ++i)
+                    {
+                        pos[i] = {0, 1};
+                        coord[i] = {index[i]};
+                    }
                 }
                 else
                 {
-                    for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, i+1, p, pos, coord, index, std::forward<Func>(f));
-                }
-            }
-        }
-
-        template <class Pos, class Coord, class Func>
-        void for_each(const Pos& pos, const Coord& coord, Func&& f)
-        {
-            std::vector<std::size_t> index(pos.size());
-            if (pos.size() == 1)
-            {
-                for_each_sparse_impl(std::integral_constant<std::size_t, 0>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
-            }
-            else if (pos.size() > 1)
-            {
-                for_each_sparse_impl(std::integral_constant<std::size_t, 1>{}, 0, 0, pos, coord, index, std::forward<Func>(f));
-            }
-        }
-
-        template <class Pos, class Coord, class Index>
-        std::size_t insert_index(Pos& pos, Coord& coord, const Index& index)
-        {
-            std::size_t ielem = 0;
-            if (pos.size() == 0)
-            {
-                pos.resize(index.size());
-                coord.resize(index.size());
-                for(std::size_t i=0; i<index.size(); ++i)
-                {
-                    pos[i] = {0, 1};
-                    coord[i] = {index[i]};
-                }
-            }
-            else
-            {
-                for(std::size_t i=0; i<index.size(); ++i)
-                {
-                    auto it = std::find_if(coord[i].cbegin() + pos[i][ielem], coord[i].cbegin() + pos[i][ielem + 1], [&](auto e){return e >= index[i];});
-
-                    if (it == coord[i].cbegin() + pos[i][ielem + 1] || *it != index[i])
+                    for(std::size_t i=0; i<index.size(); ++i)
                     {
-                        for(std::size_t j=ielem + 1; j<pos[i].size(); ++j)
+                        auto it = std::find_if(coord[i].cbegin() + pos[i][ielem], coord[i].cbegin() + pos[i][ielem + 1], [&](auto e){return e >= index[i];});
+                        if (it == coord[i].cbegin() + pos[i][ielem + 1] || *it != index[i])
                         {
-                            pos[i][j]++;
-                        }
-                        coord[i].insert(it, index[i]);
-
-                        ielem = static_cast<std::size_t>(it - (coord[i].cbegin() + pos[i][ielem]));
-
-                        for(std::size_t k=i+1; k<index.size(); ++k)
-                        {
-                            pos[k].insert(pos[k].begin() + ielem + 1, pos[k][ielem]);
-                            for(std::size_t j=ielem + 1; j<pos[k].size(); ++j)
+                            for(std::size_t j = ielem + 1; j < pos[i].size(); ++j)
                             {
-                                pos[k][j]++;
-                            }   
-                            coord[k].insert(coord[k].cbegin() + pos[k][ielem], index[k]);
-                            ielem = pos[k][ielem];
+                                pos[i][j]++;
+                            }
+                            ielem = static_cast<std::size_t>(it - coord[i].cbegin());
+                            coord[i].insert(it, index[i]);
+
+                            for(std::size_t k = i + 1; k < index.size(); ++k)
+                            {
+                                pos[k].insert(pos[k].begin() + ielem + 1, pos[k][ielem]);
+                                for(std::size_t j=ielem + 1; j<pos[k].size(); ++j)
+                                {
+                                    pos[k][j]++;
+                                }
+                                coord[k].insert(coord[k].cbegin() + pos[k][ielem], index[k]);
+                                ielem = pos[k][ielem];
+                            }
+                            return ielem;
                         }
-                        return ielem;
+                        ielem = static_cast<std::size_t>(it - coord[i].cbegin());
                     }
-                    ielem = static_cast<std::size_t>(it - (coord[i].cbegin() + pos[i][ielem]));
+                    return std::numeric_limits<std::size_t>::max();
                 }
-                return std::numeric_limits<std::size_t>::max();
+
+                return ielem;
             }
-            return ielem;
         }
     }
 
@@ -320,7 +327,7 @@ namespace xt
             XTENSOR_ASSERT(m_pos.size() == index.size());
         }
 
-        auto ielem = detail::insert_index(m_pos, m_coords, index);
+        auto ielem = detail::csf::insert_index(m_pos, m_coords, index);
         XTENSOR_ASSERT(ielem != std::numeric_limits<std::size_t>::max());
 
         if (ielem == this->storage().size())
@@ -353,10 +360,10 @@ namespace xt
         coordinate_type new_coords;
         position_type new_pos;
 
-        detail::for_each(m_pos, m_coords, [&](auto index){
+        detail::csf::for_each(m_pos, m_coords, [&](auto index){
             std::size_t offset = element_offset<std::size_t>(old_strides, index.cbegin(), index.cend());
             index_type new_index = unravel_from_strides(offset, new_strides);
-            detail::insert_index(new_pos, new_coords, new_index);
+            detail::csf::insert_index(new_pos, new_coords, new_index);
         });
 
         using std::swap;
@@ -385,7 +392,7 @@ namespace xt
                 }
                 else
                 {
-                    ielem = static_cast<std::size_t>(it - (m_coords[i].cbegin() + m_pos[i][ielem]));
+                    ielem = static_cast<std::size_t>(it - m_coords[i].cbegin());
                 }
             }
             else
@@ -479,8 +486,12 @@ namespace xt
      ******************************************/
 
     template <class scheme>
+    const typename xcsf_scheme_nz_iterator<scheme>::value_type
+    xcsf_scheme_nz_iterator<scheme>::ZERO = 0;
+
+    template <class scheme>
     inline xcsf_scheme_nz_iterator<scheme>::xcsf_scheme_nz_iterator(
-        scheme& s, 
+        scheme& s,
         index_type_iterator&& pos_index,
         index_type_iterator&& coord_index)
         : m_pos_index(std::move(pos_index))
@@ -541,7 +552,7 @@ namespace xt
         }
         return *this;
     }
-    
+
     template <class scheme>
     inline auto xcsf_scheme_nz_iterator<scheme>::operator+=(difference_type n) -> self_type&
     {
@@ -551,7 +562,7 @@ namespace xt
         }
         return *this;
     }
-    
+
     template <class scheme>
     inline auto xcsf_scheme_nz_iterator<scheme>::operator-=(difference_type n) -> self_type&
     {
@@ -598,7 +609,7 @@ namespace xt
     {
         return p_scheme == rhs.p_scheme && m_coord_index.back() < rhs.m_coord_index.back();
     }
-    
+
     template <class scheme>
     inline auto xcsf_scheme_nz_iterator<scheme>::update_current_index() const -> index_type&
     {
@@ -621,7 +632,7 @@ namespace xt
                           const xcsf_scheme_nz_iterator<scheme>& it2)
     {
         return it1.less_than(it2);
-    }    
+    }
 }
 
 #endif

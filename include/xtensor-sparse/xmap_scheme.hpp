@@ -139,6 +139,8 @@ namespace xt
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
 
+        static const value_type ZERO;
+
     private:
 
         scheme_type* p_scheme;
@@ -250,6 +252,10 @@ namespace xt
     /******************************************
      * xmap_scheme_nz_iterator implementation *
      ******************************************/
+
+    template <class scheme>
+    const typename xmap_scheme_nz_iterator<scheme>::value_type
+    xmap_scheme_nz_iterator<scheme>::ZERO = 0;
 
     template <class S>
     inline xmap_scheme_nz_iterator<S>::xmap_scheme_nz_iterator()

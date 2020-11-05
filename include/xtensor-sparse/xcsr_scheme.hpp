@@ -146,6 +146,8 @@ namespace xt
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
 
+        static const value_type ZERO;
+
     private:
 
         index_type& update_current_index() const;
@@ -336,6 +338,10 @@ namespace xt
     /***************************************
      * xcsr_scheme_nz_iterator implementation *
      ***************************************/
+
+    template <class scheme>
+    const typename xcsr_scheme_nz_iterator<scheme>::value_type
+    xcsr_scheme_nz_iterator<scheme>::ZERO = 0;
 
     template <class scheme>
     inline xcsr_scheme_nz_iterator<scheme>::xcsr_scheme_nz_iterator(

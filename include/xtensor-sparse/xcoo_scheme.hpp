@@ -91,7 +91,7 @@ namespace xt
 
     template <class T, class I>
     using xdefault_coo_scheme_t = typename xdefault_coo_scheme<T, I>::type;
-        
+
     /***************************
      * xcoo_scheme_nz_iterator *
      ***************************/
@@ -163,6 +163,8 @@ namespace xt
 
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
+
+        static const value_type ZERO;
 
     private:
 
@@ -315,6 +317,10 @@ namespace xt
     /******************************************
      * xcoo_scheme_nz_iterator implementation *
      ******************************************/
+
+    template <class scheme>
+    const typename xcoo_scheme_nz_iterator<scheme>::value_type
+    xcoo_scheme_nz_iterator<scheme>::ZERO = 0;
 
     template <class S>
     inline xcoo_scheme_nz_iterator<S>::xcoo_scheme_nz_iterator()

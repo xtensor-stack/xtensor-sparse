@@ -34,14 +34,16 @@ namespace xt
     {
         std::vector<std::size_t> shape{2, 5};
         xcoo_array<double> A(shape);
+        xcoo_array<double> A1(shape);
         xcsf_array<double> B(shape);
 
         A(0, 2) = 2.1;
         A(1, 2) = 1.2;
+        A1(0, 2) = 2.1;
+        A1(1, 2) = 1.2;
         B(1, 2) = 4.2;
 
         auto expr1 = A*B + B;
-
         auto it1 = expr1.nz_begin();
         EXPECT_EQ(*it1, 0.);
         ++it1;
@@ -53,6 +55,17 @@ namespace xt
         ++it2;
         EXPECT_EQ(*it2, 6.24);
 
+        auto expr3 = A*B + 1;
+        auto it3 = expr3.nz_begin();
+        EXPECT_EQ(*it3, 1.);
+        ++it3;
+        EXPECT_EQ(*it3, 6.04);
+
+        auto expr4 = A*B + B + 1;
+        auto it4 = expr4.nz_begin();
+        EXPECT_EQ(*it4, 1.);
+        ++it4;
+        EXPECT_EQ(*it4, 10.24);
     }
 
     TEST(xsparse_function, nz_iterator_end)
@@ -80,6 +93,11 @@ namespace xt
         --it2;
         EXPECT_EQ(*it2, 2.1);
 
+        auto expr3 = A*B + A - 1;
+        auto it3 = expr3.nz_end();
+        --it3;
+        EXPECT_EQ(*it3, 5.24);
+        --it3;
+        EXPECT_EQ(*it3, 1.1);
     }
-
 }
