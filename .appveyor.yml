@@ -34,12 +34,7 @@ install:
   - conda env create --file environment-dev.yml
   - CALL conda.bat activate xtensor-sparse
   - conda install gtest=1.10.0 -c conda-forge
-  - ps: if($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") {
-        cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RELEASE .
-        }
-        else {
-        cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RELEASE .
-        }
+  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DDOWNLOAD_GTEST=ON -DCMAKE_BUILD_TYPE=RELEASE .
   - nmake test_xtensor_sparse_lib
   - cd test
 
