@@ -367,13 +367,13 @@ namespace xt
     template <class F, class... CT>
     inline bool xfunction_nz_iterator<F, CT...>::equal(const self_type& rhs) const
     {
-        return m_nz_iterators == rhs.m_nz_iterators && m_current_index == rhs.m_current_index;
+        return m_nz_iterators == rhs.m_nz_iterators;
     }
 
     template <class F, class... CT>
     inline bool xfunction_nz_iterator<F, CT...>::less_than(const self_type& rhs) const
     {
-        return m_current_index < rhs.m_current_index;
+        return m_nz_iterators < rhs.m_nz_iterators;
     }
 
     template <class F, class... CT>
