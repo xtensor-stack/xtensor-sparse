@@ -26,6 +26,34 @@ namespace xt
     namespace extension
     {
         /**********************
+         * expression_tag_and *
+         **********************/
+
+        template <>
+        struct expression_tag_and<xsparse_expression_tag, xtensor_expression_tag>
+        {
+            using type = xsparse_expression_tag;
+        };
+
+        template <>
+        struct expression_tag_and<xtensor_expression_tag, xsparse_expression_tag>
+        {
+            using type = xsparse_expression_tag;
+        };
+
+        template <>
+        struct expression_tag_and<xsparse_expression_tag, xsparse_expression_tag>
+        {
+            using type = xsparse_expression_tag;
+        };
+
+        template <>
+        struct expression_tag_and<xsparse_expression_tag>
+        {
+            using type = xsparse_expression_tag;
+        };
+
+        /**********************
          * xsparse_assign_tag *
          **********************/
 

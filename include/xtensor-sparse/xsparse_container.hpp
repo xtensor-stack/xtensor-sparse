@@ -86,6 +86,8 @@ namespace xt
         template <class It>
         const_reference element(It first, It last) const;
 
+        void insert_element(const index_type& index, const_reference value);
+
         template <class S>
         bool broadcast_shape(S& shape, bool reuse_cache = false) const;
 
@@ -252,6 +254,12 @@ namespace xt
     {
         XTENSOR_TRY(check_element_index(shape(), first, last));
         return access_impl(make_index_from_it(first, last));
+    }
+
+    template <class D>
+    inline void xsparse_container<D>::insert_element(const index_type& index, const_reference value)
+    {
+        m_scheme.insert_element(index, value);
     }
 
     template <class D>

@@ -98,15 +98,27 @@ namespace xt
         A(1, 2) = 10.;
         A(1, 0) = 20.;
 
+        B(0, 0) = 7.;
+        B(1, 4) = 9.;
+
         EXPECT_EQ(A.dimension(), size_t(2));
 
-        B = 2*A;
-        EXPECT_EQ(B(0, 0), 6.);
+        B = 2*A + B;
+        EXPECT_EQ(B(0, 0), 13.);
         EXPECT_EQ(B(1, 2), 20.);
         EXPECT_EQ(B(1, 0), 40.);
 
         EXPECT_EQ(B(0, 2), 0.);
-        EXPECT_EQ(B(1, 4), 0.);
+        EXPECT_EQ(B(1, 4), 9.);
+
+        B = 2*A + 1;
+        EXPECT_EQ(B(0, 0), 7.);
+        EXPECT_EQ(B(1, 2), 21.);
+        EXPECT_EQ(B(1, 0), 41.);
+
+        EXPECT_EQ(B(0, 2), 1.);
+        EXPECT_EQ(B(1, 4), 1.);
+
     }
 
 }
