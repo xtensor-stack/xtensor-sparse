@@ -17,10 +17,13 @@ namespace xt
         template <class E1, class E2>
         static void assign_xexpression(xexpression<E1>& e1, const xexpression<E2>& e2)
         {
-            e1.derived_cast().resize(e2.derived_cast().shape());
-            for(auto it = e2.derived_cast().nz_cbegin(); it != e2.derived_cast().nz_cend(); ++it)
+            E1& de1 = e1.derived_cast();
+            const E2& de2 = e2.derived_cast();
+
+            de1.resize(de2.shape());
+            for(auto it = de2.nz_cbegin(); it != de2.nz_cend(); ++it)
             {
-                e1.derived_cast().insert_element(it.index(), *it);
+                de1.insert_element(it.index(), *it);
             }
         }
     };
