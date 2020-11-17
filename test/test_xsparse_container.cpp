@@ -1,27 +1,24 @@
 #include "gtest/gtest.h"
-#include <vector>
-#include <xtensor-sparse/xsparse_array.hpp>
-#include <xtensor-sparse/xsparse_tensor.hpp>
+
+#include <tuple>
+#include "test_common.hpp"
+
 
 namespace xt
 {
     template <class S>
     class container_test : public ::testing::Test
-    {
-    public:
+    {};
 
-        using scheme_type = S;
-    };
-
-    using container_list_types = ::testing::Types<xcoo_array<double>,
-                                                  xcsf_array<double>,
-                                                  xmap_array<double>>;
     TYPED_TEST_SUITE(container_test, container_list_types);
 
     TYPED_TEST(container_test, shaped_constructor)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape);
 
         EXPECT_EQ(A.dimension(), size_t(2));
         EXPECT_EQ(A.shape()[0], size_t(2));
@@ -30,8 +27,11 @@ namespace xt
 
     TYPED_TEST(container_test, at)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
@@ -43,8 +43,11 @@ namespace xt
 
     TYPED_TEST(container_test, shape)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape);
 
         EXPECT_EQ(A.shape(0), 2);
         EXPECT_EQ(A.shape(1), 5);
@@ -52,8 +55,11 @@ namespace xt
 
     TYPED_TEST(container_test, element)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
@@ -68,8 +74,11 @@ namespace xt
 
     TYPED_TEST(container_test, iterator)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
@@ -91,8 +100,11 @@ namespace xt
 
     TYPED_TEST(container_test, semantic)
     {
-        std::vector<std::size_t> shape{2, 5};
-        TypeParam A(shape), B(shape);
+        using xsparse_type = typename std::tuple_element<0, TypeParam>::type;
+        using shape_type = typename xsparse_type::shape_type;
+
+        shape_type shape{2, 5};
+        xsparse_type A(shape), B(shape);
 
         A(0, 0) = 3.;
         A(1, 2) = 10.;
@@ -118,7 +130,5 @@ namespace xt
 
         EXPECT_EQ(B(0, 2), 1.);
         EXPECT_EQ(B(1, 4), 1.);
-
     }
-
 }
