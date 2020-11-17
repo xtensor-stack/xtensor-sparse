@@ -4,6 +4,8 @@
 #include <iterator>
 #include <type_traits>
 
+#include <xtl/xsequence.hpp>
+
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xstrides.hpp>
 
@@ -498,7 +500,7 @@ namespace xt
         , m_coord_index(std::move(coord_index))
         , p_scheme(&s)
     {
-        m_current_index.resize(m_pos_index.size());
+        m_current_index = xtl::make_sequence<index_type>(m_pos_index.size());
         update_current_index();
     }
 

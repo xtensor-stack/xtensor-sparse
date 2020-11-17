@@ -4,14 +4,13 @@
 #include <algorithm>
 
 #include <xtl/xmeta_utils.hpp>
+#include <xtl/xsequence.hpp>
+
 #include <xtensor/xoperation.hpp>
 
 #include "xsparse_expression.hpp"
 #include "xscalar.hpp"
 #include "xutils.hpp"
-
-#include <xtensor/xio.hpp>
-#include <xtensor/xadapt.hpp>
 
 namespace xt
 {
@@ -394,15 +393,19 @@ namespace xt
     {
         auto min = [](const auto& init, const auto& iter, const auto& is_valid)
         {
+            using init_type = std::decay_t<decltype(init)>;
+            using iter_type = decltype(iter.index());
+
             if (is_valid && !iter.index().empty())
             {
                 return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
                     init :
-                    iter.index();
+                    xtl::forward_sequence<init_type, iter_type>(iter.index());
             }
             return init;
         };
-        m_current_index = xt::accumulate(min, index_type(p_f->dimension(), std::size_t(-1)), m_nz_iterators, m_is_valid);
+        auto init = xtl::make_sequence<index_type>(p_f->dimension(), std::size_t(-1));
+        m_current_index = xt::accumulate(min, init, m_nz_iterators, m_is_valid);
     }
 
     template <class F, class... CT>
@@ -410,15 +413,19 @@ namespace xt
     {
         auto max = [](const auto& init, const auto& iter, const auto& is_valid)
         {
+            using init_type = std::decay_t<decltype(init)>;
+            using iter_type = decltype(iter.index());
+
             if (is_valid && !iter.index().empty())
             {
                 return std::lexicographical_compare(init.cbegin(), init.cend(), iter.index().cbegin(), iter.index().cend()) ?
-                    iter.index() :
+                    xtl::forward_sequence<init_type, iter_type>(iter.index()) :
                     init;
             }
             return init;
         };
-        m_current_index = xt::accumulate(max, index_type(p_f->dimension(), std::numeric_limits<std::size_t>::min()), m_nz_iterators, m_is_valid);
+        auto init = xtl::make_sequence<index_type>(p_f->dimension(), std::numeric_limits<std::size_t>::min());
+        m_current_index = xt::accumulate(max, init, m_nz_iterators, m_is_valid);
     }
 
     template <class F, class... CT>
