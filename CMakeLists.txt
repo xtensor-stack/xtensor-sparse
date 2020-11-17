@@ -22,7 +22,7 @@ message(STATUS "Building xtensor-sparse v${${PROJECT_NAME}_VERSION}")
 # Dependencies
 # ============
 
-set(xtensor_REQUIRED_VERSION 0.21.4)
+set(xtensor_REQUIRED_VERSION 0.21.10)
 if(TARGET xtensor)
     set(xtensor_VERSION ${XTENSOR_VERSION_MAJOR}.${XTENSOR_VERSION_MINOR}.${XTENSOR_VERSION_PATCH})
     # Note: This is not SEMVER compatible comparison

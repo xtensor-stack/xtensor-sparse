@@ -92,6 +92,8 @@ namespace xt
         bool broadcast_shape(S& shape, bool reuse_cache = false) const;
 
         template <class S>
+        bool has_linear_assign(const S& strides) const noexcept;
+        template <class S>
         stepper stepper_begin(const S& shape) noexcept;
         template <class S>
         stepper stepper_end(const S& shape, layout_type l) noexcept;
@@ -267,6 +269,13 @@ namespace xt
     inline bool xsparse_container<D>::broadcast_shape(S& shape, bool) const
     {
         return xt::broadcast_shape(this->shape(), shape);
+    }
+
+    template <class D>
+    template <class S>
+    inline bool xsparse_container<D>::has_linear_assign(const S&) const noexcept
+    {
+        return false;
     }
 
     template <class D>
