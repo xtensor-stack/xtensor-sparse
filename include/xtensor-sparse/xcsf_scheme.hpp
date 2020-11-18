@@ -87,8 +87,8 @@ namespace xt
         using value_type = T;
         using size_type = typename index_type::value_type;
         using storage_type = std::vector<value_type>;
-        using type = xcsf_scheme<std::vector<svector<size_type>>,
-                                 std::vector<svector<size_type>>,
+        using type = xcsf_scheme<svector<svector<size_type>>,
+                                 svector<svector<size_type>>,
                                  storage_type,
                                  index_type>;
     };
@@ -121,10 +121,15 @@ namespace xt
         {
             using base_type = xcsf_scheme_storage_type<scheme>;
             using index_type = typename scheme::index_type;
+
             using position_type = typename scheme::position_type;
-            using position_iterator = typename position_type::const_iterator;
+            using item_position_type = typename position_type::value_type;
+            using position_iterator = svector<typename item_position_type::const_iterator>;
+
             using coordinate_type = typename scheme::coordinate_type;
-            using coordinate_iterator = typename coordinate_type::const_iterator;
+            using item_coordinate_type = typename coordinate_type::value_type;
+            using coordinate_iterator = svector<typename item_coordinate_type::const_iterator>;
+
             using value_iterator = typename base_type::value_iterator;
             using value_type = typename value_iterator::value_type;
             using reference = typename value_iterator::reference;
@@ -143,19 +148,15 @@ namespace xt
         using xcsf_scheme = scheme;
         using iterator_types = detail::xcsf_scheme_nz_iterator_types<scheme>;
         using index_type = typename iterator_types::index_type;
-        using index_type_iterator = svector<typename index_type::const_iterator>;
-        using position_type = typename iterator_types::position_type;
         using position_iterator = typename iterator_types::position_iterator;
-        using coordinate_type = typename iterator_types::coordinate_type;
         using coordinate_iterator = typename iterator_types::coordinate_iterator;
         using value_type = typename iterator_types::value_type;
-        using value_iterator = typename iterator_types::value_iterator;
         using reference = typename iterator_types::reference;
         using pointer = typename iterator_types::pointer;
         using difference_type = typename iterator_types::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
-        xcsf_scheme_nz_iterator(scheme& s, index_type_iterator&& pos_index, index_type_iterator&& coord_index);
+        xcsf_scheme_nz_iterator(scheme& s, position_iterator&& pos_index, coordinate_iterator&& coord_index);
 
         self_type& operator++();
         self_type& operator--();
@@ -178,8 +179,8 @@ namespace xt
 
         index_type& update_current_index() const;
 
-        index_type_iterator m_pos_index;
-        index_type_iterator m_coord_index;
+        position_iterator m_pos_index;
+        coordinate_iterator m_coord_index;
         mutable index_type m_current_index;
         xcsf_scheme* p_scheme;
     };
@@ -409,8 +410,8 @@ namespace xt
     inline auto xcsf_scheme<P, C, ST, IT>::nz_begin() -> nz_iterator
     {
         std::size_t dim =  m_pos.size();
-        typename nz_iterator::index_type_iterator pos_index(dim);
-        typename nz_iterator::index_type_iterator coord_index(dim);
+        typename nz_iterator::position_iterator pos_index(dim);
+        typename nz_iterator::coordinate_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
             pos_index[d] = m_pos[d].cbegin();
@@ -423,8 +424,8 @@ namespace xt
     inline auto xcsf_scheme<P, C, ST, IT>::nz_end() -> nz_iterator
     {
         std::size_t dim =  m_pos.size();
-        typename nz_iterator::index_type_iterator pos_index(dim);
-        typename nz_iterator::index_type_iterator coord_index(dim);
+        typename nz_iterator::position_iterator pos_index(dim);
+        typename nz_iterator::coordinate_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
             pos_index[d] = m_pos[d].cend() - 2;
@@ -451,8 +452,8 @@ namespace xt
     inline auto xcsf_scheme<P, C, ST, IT>::nz_cbegin() const -> const_nz_iterator
     {
         std::size_t dim =  m_pos.size();
-        typename const_nz_iterator::index_type_iterator pos_index(dim);
-        typename const_nz_iterator::index_type_iterator coord_index(dim);
+        typename const_nz_iterator::position_iterator pos_index(dim);
+        typename const_nz_iterator::coordinate_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
             pos_index[d] = m_pos[d].cbegin();
@@ -465,8 +466,8 @@ namespace xt
     inline auto xcsf_scheme<P, C, ST, IT>::nz_cend() const -> const_nz_iterator
     {
         std::size_t dim =  m_pos.size();
-        typename const_nz_iterator::index_type_iterator pos_index(dim);
-        typename const_nz_iterator::index_type_iterator coord_index(dim);
+        typename const_nz_iterator::position_iterator pos_index(dim);
+        typename const_nz_iterator::coordinate_iterator coord_index(dim);
         for(std::size_t d = 0; d < dim; ++d)
         {
             pos_index[d] = m_pos[d].cend() - 2;
@@ -494,8 +495,8 @@ namespace xt
     template <class scheme>
     inline xcsf_scheme_nz_iterator<scheme>::xcsf_scheme_nz_iterator(
         scheme& s,
-        index_type_iterator&& pos_index,
-        index_type_iterator&& coord_index)
+        position_iterator&& pos_index,
+        coordinate_iterator&& coord_index)
         : m_pos_index(std::move(pos_index))
         , m_coord_index(std::move(coord_index))
         , p_scheme(&s)
