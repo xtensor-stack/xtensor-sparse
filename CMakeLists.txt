@@ -7,7 +7,7 @@ set(XTENSOR_SPARSE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # ===========
 
 file(STRINGS
-     "${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xtensor_sparse_config.hpp"
+     "${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_config.hpp"
      xtensor_sparse_version_defines
      REGEX "#define XTENSOR_SPARSE_VERSION_(MAJOR|MINOR|PATCH)")
 foreach(ver ${xtensor_sparse_version_defines})
