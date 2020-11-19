@@ -2,6 +2,8 @@
 #define TEST_COMMON_HPP
 
 #include <tuple>
+#include <xtensor/xarray.hpp>
+#include <xtensor/xtensor.hpp>
 #include <xtensor-sparse/xsparse_array.hpp>
 #include <xtensor-sparse/xsparse_tensor.hpp>
 

@@ -3,8 +3,7 @@
 #include <tuple>
 #include "test_common.hpp"
 
-#include <xtensor/xeval.hpp>
-#include <xtensor-sparse/xsparse_tensor_traits.hpp>
+#include <xtensor-sparse/xeval.hpp>
 
 namespace xt
 {

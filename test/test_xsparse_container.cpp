@@ -3,7 +3,6 @@
 #include <tuple>
 #include "test_common.hpp"
 
-
 namespace xt
 {
     template <class S>
