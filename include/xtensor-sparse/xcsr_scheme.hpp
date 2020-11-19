@@ -6,8 +6,6 @@
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xstrides.hpp>
 
-#include <xtensor/xadapt.hpp>
-#include <xtensor/xio.hpp>
 
 namespace xt
 {
@@ -175,7 +173,7 @@ namespace xt
         {
             template <class Pos, class Coord, class Index>
             std::size_t insert_index(Pos& pos, Coord& coord, const Index& index)
-            {        
+            {
                 std::size_t ielem = index[0];
                 auto it = std::find_if(coord.cbegin() + static_cast<std::ptrdiff_t>(pos[ielem]), coord.cbegin() + static_cast<std::ptrdiff_t>(pos[ielem + 1]), [&](auto e){return e >= index[1];});
                 if (it == coord.cbegin() + static_cast<std::ptrdiff_t>(pos[ielem + 1]) || *it != index[1])
@@ -345,7 +343,7 @@ namespace xt
 
     template <class scheme>
     inline xcsr_scheme_nz_iterator<scheme>::xcsr_scheme_nz_iterator(
-        scheme& s, 
+        scheme& s,
         position_iterator&& pit,
         coordinate_iterator&& cit)
         : m_pit(std::move(pit))

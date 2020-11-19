@@ -7,7 +7,7 @@ set(XTENSOR_SPARSE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # ===========
 
 file(STRINGS
-     "${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xtensor_sparse_config.hpp"
+     "${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_config.hpp"
      xtensor_sparse_version_defines
      REGEX "#define XTENSOR_SPARSE_VERSION_(MAJOR|MINOR|PATCH)")
 foreach(ver ${xtensor_sparse_version_defines})
@@ -22,7 +22,7 @@ message(STATUS "Building xtensor-sparse v${${PROJECT_NAME}_VERSION}")
 # Dependencies
 # ============
 
-set(xtensor_REQUIRED_VERSION 0.21.4)
+set(xtensor_REQUIRED_VERSION 0.21.10)
 if(TARGET xtensor)
     set(xtensor_VERSION ${XTENSOR_VERSION_MAJOR}.${XTENSOR_VERSION_MINOR}.${XTENSOR_VERSION_PATCH})
     # Note: This is not SEMVER compatible comparison
@@ -43,12 +43,20 @@ set(XTENSOR_SPARSE_HEADERS
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcoo_scheme.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcsf_scheme.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xcsr_scheme.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xeval.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xmap_scheme.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xscalar.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_array.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_assign.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_config.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_container.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_expression.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_function.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_reference.hpp
     ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_tensor.hpp
-    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xtensor_sparse_config.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_traits.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xsparse_types.hpp
+    ${XTENSOR_SPARSE_INCLUDE_DIR}/xtensor-sparse/xutils.hpp
 )
 
 add_library(xtensor-sparse INTERFACE)

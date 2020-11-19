@@ -84,21 +84,8 @@ namespace xt
 
         template <class E>
         xsparse_tensor& operator=(const xexpression<E>& e);
- 
+
     };
-
-    /******************************
-     * Common sparse tensor types *
-     ******************************/
-
-    template <class T, std::size_t N>
-    using xcoo_tensor = xsparse_tensor<T, N, xdefault_coo_scheme_t<T, std::array<std::size_t, N>>>;
-
-    template <class T, std::size_t N>
-    using xcsf_tensor = xsparse_tensor<T, N, xdefault_csf_scheme_t<T, std::array<std::size_t, N>>>;
-
-    template <class T, std::size_t N>
-    using xmap_tensor = xsparse_tensor<T, N, xdefault_map_scheme_t<T, std::array<std::size_t, N>>>;
 
     /*********************************
      * xsparse_tensor implementation *

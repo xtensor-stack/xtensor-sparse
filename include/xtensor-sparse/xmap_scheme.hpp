@@ -8,7 +8,7 @@ namespace xt
 {
     template <class scheme>
     class xmap_scheme_nz_iterator;
-    
+
     /***************
      * xmap_scheme *
      ***************/
@@ -22,7 +22,7 @@ namespace xt
         using storage_type = ST;
         using index_type = typename storage_type::key_type;
         using value_type = typename storage_type::mapped_type;
-        using refernece = value_type&;
+        using reference = value_type&;
         using const_reference = const value_type&;
         using pointer = value_type*;
         using const_pointer = const value_type*;
@@ -145,7 +145,7 @@ namespace xt
 
         scheme_type* p_scheme;
         subiterator m_it;
-    };                                         
+    };
 
     template <class S>
     bool operator==(const xmap_scheme_nz_iterator<S>& lhs,
