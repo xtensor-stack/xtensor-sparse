@@ -9,8 +9,6 @@
 #include <xtensor/xstorage.hpp>
 #include <xtensor/xstrides.hpp>
 
-#include <xtensor/xadapt.hpp>
-#include <xtensor/xio.hpp>
 
 namespace xt
 {
