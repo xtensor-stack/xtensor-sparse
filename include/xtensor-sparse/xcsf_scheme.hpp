@@ -499,9 +499,9 @@ namespace xt
         coordinate_iterator&& coord_index)
         : m_pos_index(std::move(pos_index))
         , m_coord_index(std::move(coord_index))
+        , m_current_index(xtl::make_sequence<index_type>(m_pos_index.size()))
         , p_scheme(&s)
     {
-        m_current_index = xtl::make_sequence<index_type>(m_pos_index.size());
         update_current_index();
     }
 
