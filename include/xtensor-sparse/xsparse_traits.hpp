@@ -1,11 +1,8 @@
 #ifndef XSPARSE_XSPARSE_TENSOR_TRAITS_HPP
 #define XSPARSE_XSPARSE_TENSOR_TRAITS_HPP
 
-// #include <xtensor-sparse/xsparse_tensor_traits.hpp>
-
 #include "xsparse_expression.hpp"
-#include "xsparse_array.hpp"
-#include "xsparse_tensor.hpp"
+#include "xsparse_config.hpp"
 
 namespace xt
 {
@@ -15,7 +12,7 @@ namespace xt
         struct xsparse_type_for_shape
         {
             template <class T>
-            using type = xcoo_array<T>;
+            using type = XSPARSE_DEFAULT_ARRAY(T);
         };
 
 #if defined(__GNUC__) && (__GNUC__ > 6)
@@ -33,7 +30,7 @@ namespace xt
         struct xsparse_type_for_shape<S<X, N>>
         {
             template <class T>
-            using type = xcoo_tensor<T, N>;
+            using type = XSPARSE_DEFAULT_TENSOR(T, N);
         };
     }
 

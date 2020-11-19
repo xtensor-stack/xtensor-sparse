@@ -8,6 +8,7 @@
 #include "xsparse_assign.hpp"
 #include "xsparse_function.hpp"
 #include "xsparse_reference.hpp"
+#include "xsparse_types.hpp"
 
 namespace xt
 {
