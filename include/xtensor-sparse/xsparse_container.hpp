@@ -91,6 +91,8 @@ namespace xt
         template <class S>
         bool broadcast_shape(S& shape, bool reuse_cache = false) const;
 
+        const scheme_type& scheme() const;
+
         template <class S>
         stepper stepper_begin(const S& shape) noexcept;
         template <class S>
@@ -267,6 +269,12 @@ namespace xt
     inline bool xsparse_container<D>::broadcast_shape(S& shape, bool) const
     {
         return xt::broadcast_shape(this->shape(), shape);
+    }
+
+    template <class D>
+    inline auto xsparse_container<D>::scheme() const -> const scheme_type&
+    {
+        return m_scheme;
     }
 
     template <class D>
