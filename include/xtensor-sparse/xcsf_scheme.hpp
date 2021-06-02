@@ -85,8 +85,8 @@ namespace xt
         using value_type = T;
         using size_type = typename index_type::value_type;
         using storage_type = std::vector<value_type>;
-        using type = xcsf_scheme<svector<svector<size_type>>,
-                                 svector<svector<size_type>>,
+        using type = xcsf_scheme<std::vector<std::vector<size_type>>,
+                                 std::vector<std::vector<size_type>>,
                                  storage_type,
                                  index_type>;
     };
