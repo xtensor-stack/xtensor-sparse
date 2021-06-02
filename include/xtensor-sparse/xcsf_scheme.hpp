@@ -85,8 +85,8 @@ namespace xt
         using value_type = T;
         using size_type = typename index_type::value_type;
         using storage_type = std::vector<value_type>;
-        using type = xcsf_scheme<svector<svector<size_type>>,
-                                 svector<svector<size_type>>,
+        using type = xcsf_scheme<std::vector<std::vector<size_type>>,
+                                 std::vector<std::vector<size_type>>,
                                  storage_type,
                                  index_type>;
     };
@@ -122,11 +122,11 @@ namespace xt
 
             using position_type = typename scheme::position_type;
             using item_position_type = typename position_type::value_type;
-            using position_iterator = svector<typename item_position_type::const_iterator>;
+            using position_iterator = std::vector<typename item_position_type::const_iterator>;
 
             using coordinate_type = typename scheme::coordinate_type;
             using item_coordinate_type = typename coordinate_type::value_type;
-            using coordinate_iterator = svector<typename item_coordinate_type::const_iterator>;
+            using coordinate_iterator = std::vector<typename item_coordinate_type::const_iterator>;
 
             using value_iterator = typename base_type::value_iterator;
             using value_type = typename value_iterator::value_type;
